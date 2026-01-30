@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: recruitment
+  datasource:
+    url: jdbc:mysql://localhost:3306/recruitment
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  # config pagination start 1
+  data:
+    web:
+      pageable:
+        one-indexed-parameters: true
+
+#config jwt
+caochung:
+  jwt:
+    base64-secret: o6mTauvaIYPb0FLpjVb3T6HDsUVpZNeLuRI4cYsFUAs15AXqZoQ1NEsGcatFLQVRnTl/J/scJK8Efws8fIFjoA==
+# expiration 1 day
+    access-token-validity-in-second: 86400
+    refresh-token-validity-in-second: 86400
+
