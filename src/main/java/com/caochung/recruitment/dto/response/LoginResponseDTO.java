@@ -1,14 +1,15 @@
-package com.caochung.recruitment.domain.dto.response;
+package com.caochung.recruitment.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @Getter
 @Setter
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResponseLoginDTO {
+public class LoginResponseDTO {
+    @JsonProperty("access_token")
     private String accessToken;
     private UserInfo userInfo;
 

@@ -2,10 +2,10 @@ package com.caochung.recruitment.controller;
 
 import com.caochung.recruitment.constant.SuccessCode;
 import com.caochung.recruitment.domain.Company;
-import com.caochung.recruitment.domain.dto.request.CompanyRequestDTO;
-import com.caochung.recruitment.domain.dto.response.CompanyResponseDTO;
-import com.caochung.recruitment.domain.dto.response.ResponseData;
-import com.caochung.recruitment.domain.dto.response.ResultPaginationDTO;
+import com.caochung.recruitment.dto.request.CompanyRequestDTO;
+import com.caochung.recruitment.dto.response.CompanyResponseDTO;
+import com.caochung.recruitment.dto.response.ResponseData;
+import com.caochung.recruitment.dto.response.PaginationResponseDTO;
 import com.caochung.recruitment.service.CompanyService;
 import com.turkraft.springfilter.boot.Filter;
 import jakarta.validation.Valid;
@@ -29,11 +29,11 @@ public class CompanyController {
     }
 
     @GetMapping("/companies")
-    public ResponseData<ResultPaginationDTO> getAllCompanies(
+    public ResponseData<PaginationResponseDTO> getAllCompanies(
             @Filter Specification<Company> specification,
             Pageable pageable) {
 
-        ResultPaginationDTO resultPagination= this.companyService.getAllCompanies(specification, pageable);
+        PaginationResponseDTO resultPagination= this.companyService.getAllCompanies(specification, pageable);
         return ResponseData.success(resultPagination, SuccessCode.GET_SUCCESS);
     }
 

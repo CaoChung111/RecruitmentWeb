@@ -1,6 +1,7 @@
-package com.caochung.recruitment.service;
+package com.caochung.recruitment.config;
 
 import com.caochung.recruitment.domain.User;
+import com.caochung.recruitment.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

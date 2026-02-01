@@ -1,7 +1,9 @@
-package com.caochung.recruitment.domain.dto.response;
+package com.caochung.recruitment.dto.response;
 
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.Instant;
 
 @Getter @Setter
 public class CompanyResponseDTO {
@@ -14,4 +16,8 @@ public class CompanyResponseDTO {
     private String address;
 
     private String logo;
+
+    private Instant createdAt;
+
+    private Instant updatedAt;
 }

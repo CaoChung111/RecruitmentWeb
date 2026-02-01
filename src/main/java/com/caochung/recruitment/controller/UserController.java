@@ -2,23 +2,17 @@ package com.caochung.recruitment.controller;
 
 import com.caochung.recruitment.constant.SuccessCode;
 import com.caochung.recruitment.domain.User;
-import com.caochung.recruitment.domain.dto.request.UserRequestDTO;
-import com.caochung.recruitment.domain.dto.request.UserUpdateDTO;
-import com.caochung.recruitment.domain.dto.response.CompanyResponseDTO;
-import com.caochung.recruitment.domain.dto.response.ResponseData;
-import com.caochung.recruitment.domain.dto.response.ResultPaginationDTO;
-import com.caochung.recruitment.domain.dto.response.UserResponseDTO;
+import com.caochung.recruitment.dto.request.UserRequestDTO;
+import com.caochung.recruitment.dto.request.UserUpdateDTO;
+import com.caochung.recruitment.dto.response.ResponseData;
+import com.caochung.recruitment.dto.response.PaginationResponseDTO;
+import com.caochung.recruitment.dto.response.UserResponseDTO;
 import com.caochung.recruitment.service.UserService;
 import com.turkraft.springfilter.boot.Filter;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -36,10 +30,10 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    private ResponseData<ResultPaginationDTO> getAllUsers(
+    private ResponseData<PaginationResponseDTO> getAllUsers(
             @Filter Specification<User> specification, Pageable pageable) {
-        ResultPaginationDTO resultPaginationDTO= this.userService.getAllUsers(specification, pageable);
-        return ResponseData.success(resultPaginationDTO, SuccessCode.GET_SUCCESS);
+        PaginationResponseDTO paginationResponseDTO = this.userService.getAllUsers(specification, pageable);
+        return ResponseData.success(paginationResponseDTO, SuccessCode.GET_SUCCESS);
     }
 
     @GetMapping("/users/{id}")

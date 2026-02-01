@@ -1,8 +1,9 @@
 package com.caochung.recruitment.service.mapper;
 
 import com.caochung.recruitment.domain.Company;
-import com.caochung.recruitment.domain.dto.request.CompanyRequestDTO;
-import com.caochung.recruitment.domain.dto.response.CompanyResponseDTO;
+import com.caochung.recruitment.dto.request.CompanyRequestDTO;
+import com.caochung.recruitment.dto.response.CompanyResponseDTO;
+import com.caochung.recruitment.dto.response.UserResponseDTO;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;

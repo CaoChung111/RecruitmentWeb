@@ -1,4 +1,4 @@
-package com.caochung.recruitment.domain.dto.request;
+package com.caochung.recruitment.dto.request;
 
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;

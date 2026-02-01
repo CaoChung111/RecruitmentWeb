@@ -1,4 +1,4 @@
-package com.caochung.recruitment.domain.dto.response;
+package com.caochung.recruitment.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
@@ -17,4 +17,11 @@ public class UserResponseDTO {
     private String address;
     @JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss", timezone = "UTC")
     private Instant createdAt;
+    private CompanyResponseDTO company;
+
+    @Getter @Setter
+    public static class CompanyResponseDTO {
+        private Long id;
+        private String name;
+    }
 }

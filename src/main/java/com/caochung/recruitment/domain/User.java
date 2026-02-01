@@ -10,20 +10,30 @@ import lombok.Setter;
 @Getter
 @Setter
 public class User extends Base{
+    @Column(name = "name")
     private  String name;
 
+    @Column(name = "email")
     private String email;
 
+    @Column(name = "password")
     private String password;
 
+    @Column(name = "age")
     private int age;
 
+    @Column(name = "gender")
     @Enumerated(EnumType.STRING)
     private GenderEnum gender;
 
+    @Column(name = "address")
     private String address;
 
-    @Column(columnDefinition = "MEDIUMTEXT")
+    @Column(name = "refresh_token",columnDefinition = "MEDIUMTEXT")
     private String refreshToken;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
 
 }

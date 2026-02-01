@@ -1,8 +1,7 @@
 package com.caochung.recruitment.util;
 
-import com.caochung.recruitment.domain.dto.response.ResponseLoginDTO;
+import com.caochung.recruitment.dto.response.LoginResponseDTO;
 import com.nimbusds.jose.util.Base64;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -40,7 +39,7 @@ public class SecurityUtil {
     @Value("${caochung.jwt.refresh-token-validity-in-second}")
     private long refreshTokenExpiration;
 
-    public String createAccessToken(String email, ResponseLoginDTO.UserInfo userInfo) {
+    public String createAccessToken(String email, LoginResponseDTO.UserInfo userInfo) {
         Instant now = Instant.now();
         Instant expiration = now.plus(this.accessTokenExpiration, ChronoUnit.SECONDS);
 
@@ -60,7 +59,7 @@ public class SecurityUtil {
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
     }
 
-    public String createRefreshToken(String email, ResponseLoginDTO dto) {
+    public String createRefreshToken(String email, LoginResponseDTO dto) {
         Instant now = Instant.now();
         Instant expiration = now.plus(this.refreshTokenExpiration, ChronoUnit.SECONDS);
 

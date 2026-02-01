@@ -1,6 +1,6 @@
 package com.caochung.recruitment.config;
 
-import com.caochung.recruitment.domain.dto.response.ResponseError;
+import com.caochung.recruitment.dto.response.ResponseError;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

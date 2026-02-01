@@ -1,8 +1,7 @@
 package com.caochung.recruitment.exception;
 
 import com.caochung.recruitment.constant.ErrorCode;
-import com.caochung.recruitment.domain.dto.response.ResponseError;
-import jakarta.validation.ConstraintViolationException;
+import com.caochung.recruitment.dto.response.ResponseError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;

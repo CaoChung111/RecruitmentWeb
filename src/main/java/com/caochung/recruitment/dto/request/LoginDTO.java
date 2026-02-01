@@ -1,4 +1,4 @@
-package com.caochung.recruitment.domain.dto.request;
+package com.caochung.recruitment.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

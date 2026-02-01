@@ -8,5 +8,5 @@ public enum GenderEnum {
     FEMALE,
     OTHER;
 
-    private GenderEnum() {}
+    GenderEnum() {}
 }

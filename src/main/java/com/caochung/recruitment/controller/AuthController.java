@@ -3,14 +3,13 @@ package com.caochung.recruitment.controller;
 import com.caochung.recruitment.constant.ErrorCode;
 import com.caochung.recruitment.constant.SuccessCode;
 import com.caochung.recruitment.domain.User;
-import com.caochung.recruitment.domain.dto.request.LoginDTO;
-import com.caochung.recruitment.domain.dto.response.ResponseData;
-import com.caochung.recruitment.domain.dto.response.ResponseLoginDTO;
+import com.caochung.recruitment.dto.request.LoginDTO;
+import com.caochung.recruitment.dto.response.ResponseData;
+import com.caochung.recruitment.dto.response.LoginResponseDTO;
 import com.caochung.recruitment.exception.AppException;
 import com.caochung.recruitment.service.UserService;
 import com.caochung.recruitment.util.SecurityUtil;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -39,7 +38,7 @@ public class AuthController {
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<ResponseData<ResponseLoginDTO>> Login(@Valid @RequestBody LoginDTO loginDTO) {
+    public ResponseEntity<ResponseData<LoginResponseDTO>> Login(@Valid @RequestBody LoginDTO loginDTO) {
         //Nạp input vào Security
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword());
         //Xác thực người dùng
@@ -50,16 +49,16 @@ public class AuthController {
 
         User user = this.userService.getUserByUsername(loginDTO.getUsername());
 
-        ResponseLoginDTO responseLoginDTO = ResponseLoginDTO.builder()
-                .userInfo(ResponseLoginDTO.UserInfo.builder()
+        LoginResponseDTO loginResponseDTO = LoginResponseDTO.builder()
+                .userInfo(LoginResponseDTO.UserInfo.builder()
                         .id(user.getId())
                         .username(user.getName())
                         .email(user.getEmail())
                         .build())
                 .build();
-        String accessToken = this.securityUtil.createAccessToken(authentication.getName(), responseLoginDTO.getUserInfo());
-        responseLoginDTO.setAccessToken(accessToken);
-        String refreshToken = this.securityUtil.createRefreshToken(user.getEmail(), responseLoginDTO);
+        String accessToken = this.securityUtil.createAccessToken(authentication.getName(), loginResponseDTO.getUserInfo());
+        loginResponseDTO.setAccessToken(accessToken);
+        String refreshToken = this.securityUtil.createRefreshToken(user.getEmail(), loginResponseDTO);
         this.userService.updateUserToken(refreshToken, user.getEmail());
 
         ResponseCookie responseCookie = ResponseCookie
@@ -71,7 +70,7 @@ public class AuthController {
                 .build();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-                .body(ResponseData.success(responseLoginDTO, SuccessCode.LOGIN_SUCCESS));
+                .body(ResponseData.success(loginResponseDTO, SuccessCode.LOGIN_SUCCESS));
     }
 
     @PostMapping("/auth/logout")
@@ -95,22 +94,22 @@ public class AuthController {
     }
 
     @GetMapping("/auth/account")
-    public ResponseEntity<ResponseData<ResponseLoginDTO>> getAccount() {
+    public ResponseEntity<ResponseData<LoginResponseDTO>> getAccount() {
         String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
 
         User user = this.userService.getUserByUsername(email);
-        ResponseLoginDTO responseLoginDTO = ResponseLoginDTO.builder()
-                .userInfo(ResponseLoginDTO.UserInfo.builder()
+        LoginResponseDTO loginResponseDTO = LoginResponseDTO.builder()
+                .userInfo(LoginResponseDTO.UserInfo.builder()
                         .id(user.getId())
                         .username(user.getName())
                         .email(user.getEmail())
                         .build())
                 .build();
-        return ResponseEntity.ok().body(ResponseData.success(responseLoginDTO, SuccessCode.GET_SUCCESS));
+        return ResponseEntity.ok().body(ResponseData.success(loginResponseDTO, SuccessCode.GET_SUCCESS));
     }
 
     @GetMapping("/auth/refresh")
-    public ResponseEntity<ResponseData<ResponseLoginDTO>> getRefreshToken(
+    public ResponseEntity<ResponseData<LoginResponseDTO>> getRefreshToken(
             @CookieValue(name = "refreshToken", defaultValue = "defaultRefreshToken") String refreshToken) {
         if(refreshToken.equals("defaultRefreshToken")) {
             throw new AppException(ErrorCode.INVALID_REFRESH_TOKEN);
@@ -123,16 +122,16 @@ public class AuthController {
             throw new AppException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        ResponseLoginDTO responseLoginDTO = ResponseLoginDTO.builder()
-                .userInfo(ResponseLoginDTO.UserInfo.builder()
+        LoginResponseDTO loginResponseDTO = LoginResponseDTO.builder()
+                .userInfo(LoginResponseDTO.UserInfo.builder()
                         .id(user.getId())
                         .username(user.getName())
                         .email(user.getEmail())
                         .build())
                 .build();
-        String accessToken = this.securityUtil.createAccessToken(email, responseLoginDTO.getUserInfo());
-        responseLoginDTO.setAccessToken(accessToken);
-        String newRefreshToken = this.securityUtil.createRefreshToken(email, responseLoginDTO);
+        String accessToken = this.securityUtil.createAccessToken(email, loginResponseDTO.getUserInfo());
+        loginResponseDTO.setAccessToken(accessToken);
+        String newRefreshToken = this.securityUtil.createRefreshToken(email, loginResponseDTO);
         this.userService.updateUserToken(refreshToken, email);
 
         ResponseCookie responseCookie = ResponseCookie
@@ -144,6 +143,6 @@ public class AuthController {
                 .build();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-                .body(ResponseData.success(responseLoginDTO, SuccessCode.LOGIN_SUCCESS));
+                .body(ResponseData.success(loginResponseDTO, SuccessCode.LOGIN_SUCCESS));
     }
 }

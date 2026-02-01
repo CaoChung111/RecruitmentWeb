@@ -1,16 +1,18 @@
 package com.caochung.recruitment.service;
 
 import com.caochung.recruitment.constant.ErrorCode;
+import com.caochung.recruitment.domain.Company;
 import com.caochung.recruitment.domain.User;
-import com.caochung.recruitment.domain.dto.request.UserRequestDTO;
-import com.caochung.recruitment.domain.dto.request.UserUpdateDTO;
-import com.caochung.recruitment.domain.dto.response.Meta;
-import com.caochung.recruitment.domain.dto.response.ResultPaginationDTO;
-import com.caochung.recruitment.domain.dto.response.UserResponseDTO;
+import com.caochung.recruitment.dto.request.UserRequestDTO;
+import com.caochung.recruitment.dto.request.UserUpdateDTO;
+import com.caochung.recruitment.dto.response.PaginationResponseDTO;
+import com.caochung.recruitment.dto.response.UserResponseDTO;
 import com.caochung.recruitment.exception.AppException;
+import com.caochung.recruitment.repository.CompanyRepository;
 import com.caochung.recruitment.repository.UserRepository;
 import com.caochung.recruitment.service.mapper.UserMapper;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,15 +23,19 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final CompanyRepository companyRepository;
     private final UserMapper userMapper;
 
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
         if(userRepository.existsByEmail(userRequestDTO.getEmail())){
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
+        companyRepository.findById(userRequestDTO.getCompany().getId()).orElseThrow(
+                () -> new AppException(ErrorCode.COMPANY_NOT_FOUND)
+        );
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         userRequestDTO.setPassword(passwordEncoder.encode(userRequestDTO.getPassword()));
         User user = userMapper.toEntity(userRequestDTO);
@@ -38,23 +44,26 @@ public class UserService {
         return userResponseDTO;
     }
 
-    public ResultPaginationDTO getAllUsers(Specification<User> specification, Pageable pageable) {
+    public PaginationResponseDTO getAllUsers(Specification<User> specification, Pageable pageable) {
         Page<User> pageUsers = userRepository.findAll(specification, pageable);
         List<UserResponseDTO> userResponseDTOs = userMapper.toDto(pageUsers.getContent());
 
-        Meta meta = Meta.builder()
+        PaginationResponseDTO.Meta meta = PaginationResponseDTO.Meta.builder()
                 .page(pageable.getPageNumber()+1)
                 .pageSize(pageable.getPageSize())
-                .totalPage(pageUsers.getTotalPages())
+                .totalPages(pageUsers.getTotalPages())
                 .totalItems(pageUsers.getTotalElements())
                 .build();
 
-        return new ResultPaginationDTO(meta, userResponseDTOs);
+        return new PaginationResponseDTO(meta, userResponseDTOs);
     }
 
     public void updateUser(Long id, UserUpdateDTO userUpdateDTO) {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_FOUND));
+        companyRepository.findById(userUpdateDTO.getCompany().getId()).orElseThrow(
+                () -> new AppException(ErrorCode.COMPANY_NOT_FOUND)
+        );
         userMapper.fromUpdate(userUpdateDTO, user);
         this.userRepository.save(user);
     }

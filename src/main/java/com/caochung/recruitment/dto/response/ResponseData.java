@@ -1,8 +1,7 @@
-package com.caochung.recruitment.domain.dto.response;
+package com.caochung.recruitment.dto.response;
 
 import com.caochung.recruitment.constant.SuccessCode;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Getter @Setter

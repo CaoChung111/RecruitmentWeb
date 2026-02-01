@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table(name = "companies")
 @Getter @Setter
@@ -20,5 +22,9 @@ public class Company extends Base {
     @Column(name = "logo")
     private String logo;
 
+    @OneToMany(mappedBy = "company",  fetch = FetchType.LAZY)
+    private List<User> users;
 
+    @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
+    private List<Job> jobs;
 }

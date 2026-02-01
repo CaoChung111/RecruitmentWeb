@@ -1,4 +1,4 @@
-package com.caochung.recruitment.domain.dto.response;
+package com.caochung.recruitment.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
