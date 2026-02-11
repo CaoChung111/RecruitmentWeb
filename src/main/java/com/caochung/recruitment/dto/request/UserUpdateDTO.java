@@ -20,5 +20,5 @@ public class UserUpdateDTO {
 
     private String address;
 
-    private Company company;
+    private Long companyId;
 }

@@ -1,7 +1,7 @@
 package com.caochung.recruitment.config;
 
 import com.caochung.recruitment.domain.User;
-import com.caochung.recruitment.service.UserService;
+import com.caochung.recruitment.service.impl.UserServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,11 +15,11 @@ import java.util.Collections;
 @AllArgsConstructor
 public class UserDetailCustom implements UserDetailsService {
 
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = this.userService.getUserByUsername(username);
+        User user = this.userServiceImpl.getUserByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException(username);
         }

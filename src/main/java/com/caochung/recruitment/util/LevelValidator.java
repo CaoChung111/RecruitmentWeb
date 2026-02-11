@@ -1,28 +1,26 @@
 package com.caochung.recruitment.util;
 
-import com.caochung.recruitment.constant.GenderEnum;
 import com.caochung.recruitment.constant.LevelEnum;
-import com.caochung.recruitment.util.annotation.Gender;
+import com.caochung.recruitment.util.annotation.Level;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class GenderValidator implements ConstraintValidator<Gender, String> {
-
-    private List<String> genders;
+public class LevelValidator implements ConstraintValidator<Level,String> {
+    private List<String> levels;
 
     @Override
-    public void initialize(Gender constraintAnnotation) {
+    public void initialize(Level constraintAnnotation) {
         var subset = constraintAnnotation.anyOf();
 
         if (subset.length == 0) {
-            this.genders = Arrays.stream(GenderEnum.values())
+            this.levels = Arrays.stream(LevelEnum.values())
                     .map(Enum::name)
                     .toList();
         } else {
-            this.genders = Arrays.stream(subset)
+            this.levels = Arrays.stream(subset)
                     .map(Enum::name)
                     .toList();
         }
@@ -30,6 +28,6 @@ public class GenderValidator implements ConstraintValidator<Gender, String> {
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        return value == null || genders.contains(value);
+        return value != null && levels.contains(value);
     }
 }

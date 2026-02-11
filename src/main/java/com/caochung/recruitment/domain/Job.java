@@ -1,5 +1,6 @@
 package com.caochung.recruitment.domain;
 
+import com.caochung.recruitment.constant.JobStatusEnum;
 import com.caochung.recruitment.constant.LevelEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -25,6 +26,7 @@ public class Job extends Base{
     private Integer quantity;
 
     @Column(name = "level")
+    @Enumerated(EnumType.STRING)
     private LevelEnum level;
 
     @Column(name = "description", columnDefinition = "MEDIUMTEXT")
@@ -37,7 +39,8 @@ public class Job extends Base{
     private Instant endDate;
 
     @Column(name = "active")
-    private boolean active;
+    @Enumerated(EnumType.STRING)
+    private JobStatusEnum active;
 
     @ManyToOne
     @JoinColumn(name = "company_id")
@@ -48,4 +51,7 @@ public class Job extends Base{
     joinColumns = @JoinColumn(name = "job_id"),
     inverseJoinColumns = @JoinColumn(name = "skill_id"))
     private List<Skill> skills;
+
+    @OneToMany(mappedBy = "job", fetch = FetchType.LAZY)
+    private List<Resume> resumes ;
 }

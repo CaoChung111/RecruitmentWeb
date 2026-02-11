@@ -5,6 +5,7 @@ import com.caochung.recruitment.domain.Company;
 import com.caochung.recruitment.util.annotation.Gender;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,6 +34,7 @@ public class UserRequestDTO implements Serializable {
 
     private String address;
 
-    private Company company;
+    @NotNull(message = "Company ID cannot be null")
+    private Long companyId;
 
 }

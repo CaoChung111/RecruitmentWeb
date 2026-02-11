@@ -6,26 +6,38 @@ import com.caochung.recruitment.dto.request.CompanyRequestDTO;
 import com.caochung.recruitment.dto.response.CompanyResponseDTO;
 import com.caochung.recruitment.dto.response.ResponseData;
 import com.caochung.recruitment.dto.response.PaginationResponseDTO;
-import com.caochung.recruitment.service.CompanyService;
+import com.caochung.recruitment.service.impl.CompanyServiceImpl;
 import com.turkraft.springfilter.boot.Filter;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1")
 public class CompanyController {
-    private final CompanyService companyService;
+    private final CompanyServiceImpl companyServiceImpl;
 
-    public CompanyController(CompanyService companyService) {
-        this.companyService = companyService;
+    public CompanyController(CompanyServiceImpl companyServiceImpl) {
+        this.companyServiceImpl = companyServiceImpl;
     }
 
-    @PostMapping("/companies")
-    public ResponseData<CompanyResponseDTO> createCompany(@Valid @RequestBody CompanyRequestDTO companyRequestDTO) {
-        CompanyResponseDTO company = this.companyService.createCompany(companyRequestDTO);
+    @PostMapping(value = "/companies", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseData<CompanyResponseDTO> createCompany(
+            @Valid @RequestPart("company") CompanyRequestDTO companyRequestDTO,
+            @RequestPart("file") MultipartFile file){
+        CompanyResponseDTO company = this.companyServiceImpl.createCompany(companyRequestDTO, file);
         return ResponseData.success(company, SuccessCode.CREATED_SUCCESS);
+    }
+
+    @GetMapping("/companies/{id}")
+    public ResponseData<CompanyResponseDTO> getCompanyById(@PathVariable Long id) {
+        CompanyResponseDTO company = this.companyServiceImpl.getCompanyById(id);
+        return ResponseData.success(company, SuccessCode.GET_SUCCESS);
     }
 
     @GetMapping("/companies")
@@ -33,19 +45,19 @@ public class CompanyController {
             @Filter Specification<Company> specification,
             Pageable pageable) {
 
-        PaginationResponseDTO resultPagination= this.companyService.getAllCompanies(specification, pageable);
+        PaginationResponseDTO resultPagination= this.companyServiceImpl.getAllCompanies(specification, pageable);
         return ResponseData.success(resultPagination, SuccessCode.GET_SUCCESS);
     }
 
     @PutMapping("/companies/{id}")
-    public ResponseData updateCompany(@PathVariable Long id ,@Valid @RequestBody CompanyRequestDTO companyRequestDTO) {
-        this.companyService.updateCompany(id, companyRequestDTO);
+    public ResponseData<?> updateCompany(@PathVariable Long id ,@Valid @RequestBody CompanyRequestDTO companyRequestDTO) {
+        this.companyServiceImpl.updateCompany(id, companyRequestDTO);
         return ResponseData.success(SuccessCode.PUT_SUCCESS);
     }
 
     @DeleteMapping("/companies/{id}")
-    public ResponseData deleteCompany(@PathVariable Long id) {
-        this.companyService.deleteCompany(id);
+    public ResponseData<?> deleteCompany(@PathVariable Long id) {
+        this.companyServiceImpl.deleteCompany(id);
         return ResponseData.success(SuccessCode.DELETE_SUCCESS);
     }
 }

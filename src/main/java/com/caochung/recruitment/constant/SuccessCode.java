@@ -11,7 +11,9 @@ public enum SuccessCode {
     DELETE_SUCCESS(HttpStatus.OK,"Delete Success"),
 
     LOGIN_SUCCESS(HttpStatus.CREATED, "Login Success"),
-    LOGOUT_SUCCESS(HttpStatus.CREATED, "Logout Success"),;
+    LOGOUT_SUCCESS(HttpStatus.CREATED, "Logout Success"),
+
+    UPLOAD_SUCCESS(HttpStatus.CREATED, "Upload Success"),;
 
     private final HttpStatus status;
     private final String message;

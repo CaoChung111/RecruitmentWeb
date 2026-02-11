@@ -7,7 +7,7 @@ import com.caochung.recruitment.dto.request.LoginDTO;
 import com.caochung.recruitment.dto.response.ResponseData;
 import com.caochung.recruitment.dto.response.LoginResponseDTO;
 import com.caochung.recruitment.exception.AppException;
-import com.caochung.recruitment.service.UserService;
+import com.caochung.recruitment.service.impl.UserServiceImpl;
 import com.caochung.recruitment.util.SecurityUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,15 +26,15 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final SecurityUtil securityUtil;
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     @Value("${caochung.jwt.refresh-token-validity-in-second}")
     private long refreshTokenExpiration;
 
-    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, UserService userService) {
+    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, UserServiceImpl userServiceImpl) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.securityUtil = securityUtil;
-        this.userService = userService;
+        this.userServiceImpl = userServiceImpl;
     }
 
     @PostMapping("/auth/login")
@@ -47,7 +47,7 @@ public class AuthController {
         //Tạo token
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        User user = this.userService.getUserByUsername(loginDTO.getUsername());
+        User user = this.userServiceImpl.getUserByUsername(loginDTO.getUsername());
 
         LoginResponseDTO loginResponseDTO = LoginResponseDTO.builder()
                 .userInfo(LoginResponseDTO.UserInfo.builder()
@@ -59,7 +59,7 @@ public class AuthController {
         String accessToken = this.securityUtil.createAccessToken(authentication.getName(), loginResponseDTO.getUserInfo());
         loginResponseDTO.setAccessToken(accessToken);
         String refreshToken = this.securityUtil.createRefreshToken(user.getEmail(), loginResponseDTO);
-        this.userService.updateUserToken(refreshToken, user.getEmail());
+        this.userServiceImpl.updateUserToken(refreshToken, user.getEmail());
 
         ResponseCookie responseCookie = ResponseCookie
                 .from("refreshToken", refreshToken)
@@ -79,7 +79,7 @@ public class AuthController {
         if(email.isEmpty()){
             throw new AppException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
-        this.userService.updateUserToken(null, email);
+        this.userServiceImpl.updateUserToken(null, email);
 
         ResponseCookie deleteSpringCookie = ResponseCookie
                 .from("refreshToken", null)
@@ -97,7 +97,7 @@ public class AuthController {
     public ResponseEntity<ResponseData<LoginResponseDTO>> getAccount() {
         String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
 
-        User user = this.userService.getUserByUsername(email);
+        User user = this.userServiceImpl.getUserByUsername(email);
         LoginResponseDTO loginResponseDTO = LoginResponseDTO.builder()
                 .userInfo(LoginResponseDTO.UserInfo.builder()
                         .id(user.getId())
@@ -117,7 +117,7 @@ public class AuthController {
         Jwt decodeRefreshToken = this.securityUtil.checkValidRefreshToken(refreshToken);
         String email = decodeRefreshToken.getSubject();
 
-        User user = this.userService.getUserByRefreshTokenAndEmail(refreshToken, email);
+        User user = this.userServiceImpl.getUserByRefreshTokenAndEmail(refreshToken, email);
         if (user == null) {
             throw new AppException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
@@ -132,7 +132,7 @@ public class AuthController {
         String accessToken = this.securityUtil.createAccessToken(email, loginResponseDTO.getUserInfo());
         loginResponseDTO.setAccessToken(accessToken);
         String newRefreshToken = this.securityUtil.createRefreshToken(email, loginResponseDTO);
-        this.userService.updateUserToken(refreshToken, email);
+        this.userServiceImpl.updateUserToken(refreshToken, email);
 
         ResponseCookie responseCookie = ResponseCookie
                 .from("refreshToken", newRefreshToken)

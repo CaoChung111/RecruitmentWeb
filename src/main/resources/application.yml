@@ -15,6 +15,11 @@ spring:
     web:
       pageable:
         one-indexed-parameters: true
+  # Multipart config
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 #config jwt
 caochung:
@@ -24,3 +29,8 @@ caochung:
     access-token-validity-in-second: 86400
     refresh-token-validity-in-second: 86400
 
+#cloudinary config
+cloudinary:
+  cloud-name: drzkudoix
+  api-key: 761716841287235
+  api-secret: ZqrNqWiIQSvRbn2db5-nmcH5iJ4
