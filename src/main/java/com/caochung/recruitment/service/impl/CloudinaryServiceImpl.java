@@ -1,20 +1,16 @@
 package com.caochung.recruitment.service.impl;
 
-import ch.qos.logback.core.util.StringUtil;
 import com.caochung.recruitment.constant.ErrorCode;
 import com.caochung.recruitment.exception.AppException;
 import com.caochung.recruitment.service.CloudinaryService;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.cloudinary.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -31,8 +27,8 @@ public class CloudinaryServiceImpl implements CloudinaryService {
             }
             String publicValue = generatePublicValue(file.getOriginalFilename());
 
-            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
-                    "puplic_id", publicValue,
+            var uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+                    "public_id", publicValue,
                     "resource_type", "auto",
                     "folder", "resume"
             ));
@@ -44,7 +40,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     }
 
     @Override
-    public List<String> uploadFiles(MultipartFile[] files) throws IOException{
+    public List<String> uploadFiles(MultipartFile[] files) {
         List<String> urls = new ArrayList<>();
         for (MultipartFile file : files) {
             urls.add(uploadFile(file));
@@ -59,7 +55,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     }
 
     public String getFileName(String originalName){
-        if( originalName==null || originalName.equals("")){
+        if( originalName==null || originalName.isEmpty()){
             return "unknown";
         }
         int index = originalName.lastIndexOf('.');

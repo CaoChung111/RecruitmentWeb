@@ -1,9 +1,11 @@
 package com.caochung.recruitment.controller;
 
+import com.caochung.recruitment.constant.SecurityConstant;
 import com.caochung.recruitment.constant.SuccessCode;
 import com.caochung.recruitment.dto.response.ResponseData;
 import com.caochung.recruitment.service.CloudinaryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +22,7 @@ public class CloudinaryController {
     private final CloudinaryService cloudinaryService;
 
     @PostMapping("/uploads")
+    @PreAuthorize(SecurityConstant.FILE_UPLOAD)
     public ResponseData<?> uploadFile(@RequestParam("files") MultipartFile[] files) throws IOException {
         List<String> urls = cloudinaryService.uploadFiles(files);
         return ResponseData.success(urls ,SuccessCode.UPLOAD_SUCCESS);

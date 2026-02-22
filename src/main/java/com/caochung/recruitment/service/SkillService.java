@@ -14,6 +14,8 @@ public interface SkillService {
 
     PaginationResponseDTO getSkills(Specification<Skill> specification, Pageable pageable);
 
+    SkillResponseDTO getSkillById(Long id);
+
     void updateSkill(Long id, SkillRequestDTO skillRequestDTO);
 
     void deleteSkill(Long id);

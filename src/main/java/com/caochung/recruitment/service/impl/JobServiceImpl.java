@@ -46,6 +46,12 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    public JobResponseDTO getJobById(Long id) {
+        Job job = this.jobRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.JOB_NOT_FOUND));
+        return this.jobMapper.toDto(job);
+    }
+
+    @Override
     public void updateJob(Long id, JobRequestDTO jobRequestDTO) {
         Job job = this.jobRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.JOB_NOT_FOUND));
         if(!job.getName().equals(jobRequestDTO.getName()) && this.jobRepository.existsByName(jobRequestDTO.getName())){

@@ -1,5 +1,7 @@
 package com.caochung.recruitment.controller;
 
+import com.caochung.recruitment.constant.PermissionEnum;
+import com.caochung.recruitment.constant.SecurityConstant;
 import com.caochung.recruitment.constant.SuccessCode;
 import com.caochung.recruitment.domain.Company;
 import com.caochung.recruitment.dto.request.CompanyRequestDTO;
@@ -12,6 +14,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +30,7 @@ public class CompanyController {
     }
 
     @PostMapping(value = "/companies", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize(SecurityConstant.COMPANY_CREATE)
     public ResponseData<CompanyResponseDTO> createCompany(
             @Valid @RequestPart("company") CompanyRequestDTO companyRequestDTO,
             @RequestPart("file") MultipartFile file){
@@ -50,12 +54,14 @@ public class CompanyController {
     }
 
     @PutMapping("/companies/{id}")
+    @PreAuthorize(SecurityConstant.COMPANY_UPDATE)
     public ResponseData<?> updateCompany(@PathVariable Long id ,@Valid @RequestBody CompanyRequestDTO companyRequestDTO) {
         this.companyServiceImpl.updateCompany(id, companyRequestDTO);
         return ResponseData.success(SuccessCode.PUT_SUCCESS);
     }
 
     @DeleteMapping("/companies/{id}")
+    @PreAuthorize(SecurityConstant.COMPANY_DELETE)
     public ResponseData<?> deleteCompany(@PathVariable Long id) {
         this.companyServiceImpl.deleteCompany(id);
         return ResponseData.success(SuccessCode.DELETE_SUCCESS);

@@ -4,7 +4,9 @@ import com.caochung.recruitment.constant.ErrorCode;
 import com.caochung.recruitment.dto.response.ResponseError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -71,6 +73,18 @@ public class GlobalExceptionHandler{
         responseError.setError(ErrorCode.FILE_TOO_LARGE.name());
         responseError.setMessage(ex.getMessage());
         return ResponseEntity.status(ErrorCode.FILE_TOO_LARGE.getHttpStatus()).body(responseError);
+    }
+
+    @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})
+    public ResponseEntity<ResponseError> handleAccessDeniedException(Exception ex, WebRequest request) {
+        ResponseError responseError = new ResponseError();
+        responseError.setTimestamp(new Date());
+        responseError.setPath(request.getDescription(false).replace("uri=", ""));
+        responseError.setStatus(HttpStatus.FORBIDDEN.value());
+        responseError.setError(ErrorCode.ACCESS_DENIED.name());
+        responseError.setMessage(ErrorCode.ACCESS_DENIED.getMessage());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseError);
     }
 
     @ExceptionHandler(Exception.class)

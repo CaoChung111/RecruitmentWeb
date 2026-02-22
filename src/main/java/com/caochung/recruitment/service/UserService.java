@@ -2,6 +2,7 @@ package com.caochung.recruitment.service;
 
 import com.caochung.recruitment.constant.ErrorCode;
 import com.caochung.recruitment.domain.User;
+import com.caochung.recruitment.dto.request.RegisterDTO;
 import com.caochung.recruitment.dto.request.UserRequestDTO;
 import com.caochung.recruitment.dto.request.UserUpdateDTO;
 import com.caochung.recruitment.dto.response.PaginationResponseDTO;
@@ -17,6 +18,8 @@ import java.util.List;
 
 public interface UserService {
     UserResponseDTO createUser(UserRequestDTO userRequestDTO);
+
+    UserResponseDTO register(RegisterDTO registerDTO);
 
     PaginationResponseDTO getAllUsers(Specification<User> specification, Pageable pageable);
 

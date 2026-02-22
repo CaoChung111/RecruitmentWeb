@@ -1,6 +1,7 @@
 package com.caochung.recruitment.util;
 
 import com.caochung.recruitment.dto.response.LoginResponseDTO;
+import com.caochung.recruitment.dto.response.RoleResponseDTO;
 import com.nimbusds.jose.util.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -39,20 +40,30 @@ public class SecurityUtil {
     @Value("${caochung.jwt.refresh-token-validity-in-second}")
     private long refreshTokenExpiration;
 
-    public String createAccessToken(String email, LoginResponseDTO.UserInfo userInfo) {
+    public String createAccessToken(String email, LoginResponseDTO loginResponseDTO) {
+        LoginResponseDTO.UserInfo userInfo = loginResponseDTO.getUserInfo();
+
+        List<String> authorities = new ArrayList<>();
+        if(userInfo!=null && userInfo.getRole()!=null && userInfo.getRole().getPermissions()!=null){
+            authorities = userInfo.getRole().getPermissions().stream()
+                    .map(RoleResponseDTO.PermissionRole::getName).toList();
+        }
+
+        LoginResponseDTO.UserInsideToken userToken = LoginResponseDTO.UserInsideToken.builder()
+                .id(loginResponseDTO.getUserInfo().getId())
+                .email(loginResponseDTO.getUserInfo().getEmail())
+                .username(loginResponseDTO.getUserInfo().getUsername())
+                .build();
+
         Instant now = Instant.now();
         Instant expiration = now.plus(this.accessTokenExpiration, ChronoUnit.SECONDS);
-
-        List<String> listAuthority = new ArrayList<>();
-        listAuthority.add("ROLE_USER_CREATE");
-        listAuthority.add("ROLE_USER_UPDATE");
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
                 .expiresAt(expiration)
                 .subject(email)
-                .claim("user", userInfo)
-                .claim("permission", listAuthority)
+                .claim("user", userToken)
+                .claim("permission", authorities)
                 .build();
 
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
@@ -60,6 +71,12 @@ public class SecurityUtil {
     }
 
     public String createRefreshToken(String email, LoginResponseDTO dto) {
+        LoginResponseDTO.UserInsideToken userToken = LoginResponseDTO.UserInsideToken.builder()
+                .id(dto.getUserInfo().getId())
+                .email(dto.getUserInfo().getEmail())
+                .username(dto.getUserInfo().getUsername())
+                .build();
+
         Instant now = Instant.now();
         Instant expiration = now.plus(this.refreshTokenExpiration, ChronoUnit.SECONDS);
 
@@ -67,7 +84,7 @@ public class SecurityUtil {
                 .issuedAt(now)
                 .expiresAt(expiration)
                 .subject(email)
-                .claim("user", dto.getUserInfo())
+                .claim("user", userToken)
                 .build();
 
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();

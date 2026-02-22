@@ -1,5 +1,6 @@
 package com.caochung.recruitment.controller;
 
+import com.caochung.recruitment.constant.SecurityConstant;
 import com.caochung.recruitment.constant.SuccessCode;
 import com.caochung.recruitment.domain.Resume;
 import com.caochung.recruitment.dto.request.ResumeRequestDTO;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +27,7 @@ public class ResumeController {
     private final ResumeService resumeService;
 
     @GetMapping("/resumes")
+    @PreAuthorize(SecurityConstant.RESUME_VIEW_ALL)
     public ResponseData<PaginationResponseDTO> getResumes(
             @Filter Specification<Resume> specification,
             Pageable pageable){
@@ -33,6 +36,7 @@ public class ResumeController {
     }
 
     @PostMapping(value = "/resumes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize(SecurityConstant.RESUME_CREATE)
     public ResponseData<ResumeResponseDTO> createResume(@Valid @RequestPart("resume") ResumeRequestDTO resumeRequestDTO,
                                                         @RequestPart("file") MultipartFile cv){
         ResumeResponseDTO resumeResponseDTO = this.resumeService.createResume(resumeRequestDTO, cv);
@@ -40,20 +44,39 @@ public class ResumeController {
     }
 
     @PatchMapping("/resumes/{id}")
+    @PreAuthorize(SecurityConstant.RESUME_UPDATE)
     public ResponseData<?> updateResume(@PathVariable Long id, @Valid @RequestBody ResumeUpdateDTO resumeUpdateDTO){
         this.resumeService.updateResume(id, resumeUpdateDTO);
         return ResponseData.success(SuccessCode.PUT_SUCCESS);
     }
 
     @DeleteMapping("/resumes/{id}")
+    @PreAuthorize(SecurityConstant.RESUME_DELETE)
     public ResponseData<?> deleteResume(@PathVariable Long id){
         this.resumeService.deleteResume(id);
         return ResponseData.success(SuccessCode.DELETE_SUCCESS);
     }
 
     @GetMapping("/resumes/{id}")
-    public ResponseData<ResumeResponseDTO> getResume(@PathVariable Long id){
+    @PreAuthorize(SecurityConstant.RESUME_VIEW_DETAIL)
+    public ResponseData<ResumeResponseDTO> getResumeById(@PathVariable Long id){
         ResumeResponseDTO resumeResponseDTO = this.resumeService.getResumeById(id);
         return ResponseData.success(resumeResponseDTO, SuccessCode.GET_SUCCESS);
+    }
+
+    @GetMapping("/resumes/by-user")
+    @PreAuthorize(SecurityConstant.RESUME_VIEW_OWN)
+    public ResponseData<PaginationResponseDTO> getResumesByUser(Pageable pageable){
+        PaginationResponseDTO responseDTO = this.resumeService.getResumeByUser(pageable);
+        return ResponseData.success(responseDTO, SuccessCode.GET_SUCCESS);
+    }
+
+    @GetMapping("/resumes/by-company")
+    @PreAuthorize(SecurityConstant.RESUME_VIEW_COMPANY)
+    public ResponseData<PaginationResponseDTO> getResumesByCompany(
+            @Filter Specification<Resume> specification,
+            Pageable pageable){
+        PaginationResponseDTO paginationResponseDTO = this.resumeService.getResumeByCompany(specification,pageable);
+        return ResponseData.success(paginationResponseDTO, SuccessCode.GET_SUCCESS);
     }
 }

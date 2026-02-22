@@ -1,0 +1,19 @@
+package com.caochung.recruitment.repository;
+
+import com.caochung.recruitment.domain.Permission;
+import com.caochung.recruitment.domain.Role;
+import com.caochung.recruitment.dto.request.RoleRequestDTO;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface RoleRepository extends JpaRepository<Role,Long>, JpaSpecificationExecutor<Role> {
+    boolean existsByName(String name);
+
+    Role findByName(String name);
+
+    List<Role> findAllByPermissionsContains(Permission permission);
+}

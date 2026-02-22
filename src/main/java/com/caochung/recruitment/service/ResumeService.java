@@ -1,6 +1,7 @@
 package com.caochung.recruitment.service;
 
 import com.caochung.recruitment.domain.Resume;
+import com.caochung.recruitment.domain.User;
 import com.caochung.recruitment.dto.request.ResumeRequestDTO;
 import com.caochung.recruitment.dto.request.ResumeUpdateDTO;
 import com.caochung.recruitment.dto.response.PaginationResponseDTO;
@@ -21,4 +22,9 @@ public interface ResumeService {
     PaginationResponseDTO getResumes(Specification<Resume> specification, Pageable pageable);
 
     ResumeResponseDTO getResumeById(Long id);
+
+    PaginationResponseDTO getResumeByUser(Pageable pageable);
+
+    PaginationResponseDTO getResumeByCompany(Specification<Resume> specification ,Pageable pageable);
+
 }

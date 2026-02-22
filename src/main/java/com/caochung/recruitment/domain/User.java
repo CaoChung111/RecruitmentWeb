@@ -40,4 +40,8 @@ public class User extends Base{
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Resume> resumes;
+
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
 }

@@ -50,6 +50,12 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
+    public SkillResponseDTO getSkillById(Long id) {
+        Skill skill = this.skillRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SKILL_NOT_FOUND));
+        return skillMapper.toDto(skill);
+    }
+
+    @Override
     public void updateSkill(Long id, SkillRequestDTO skillRequestDTO) {
         Skill skill = this.skillRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.SKILL_NOT_FOUND));
@@ -65,9 +71,9 @@ public class SkillServiceImpl implements SkillService {
         Skill skill = this.skillRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.SKILL_NOT_FOUND));
         List<Job> jobs = this.jobRepository.findAllBySkillsContaining(skill);
-        jobs.forEach(j -> {
+        for (Job j : jobs) {
             j.getSkills().remove(skill);
-        });
+        }
         this.skillRepository.delete(skill);
     }
 }

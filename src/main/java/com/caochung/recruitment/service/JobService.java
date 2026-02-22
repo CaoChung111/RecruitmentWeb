@@ -14,6 +14,8 @@ public interface JobService {
 
     PaginationResponseDTO getJobs(Specification<Job> specification, Pageable pageable);
 
+    JobResponseDTO getJobById(Long id);
+
     void updateJob(Long id, JobRequestDTO jobRequestDTO);
 
     void deleteJob(Long id);

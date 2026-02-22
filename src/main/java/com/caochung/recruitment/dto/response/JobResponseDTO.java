@@ -15,16 +15,26 @@ public class JobResponseDTO {
 
     private String location;
 
+    private Double salary;
+
     private Integer quantity;
 
     private String level;
 
     private String active;
 
+    private JobCompany company;
+
     private List<JobSkill> skills;
 
     @Getter @Setter
     public static class JobSkill{
+        private Long id;
+        private String name;
+    }
+
+    @Getter @Setter
+    public static class JobCompany{
         private Long id;
         private String name;
     }

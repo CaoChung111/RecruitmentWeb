@@ -4,16 +4,20 @@ import com.caochung.recruitment.constant.ErrorCode;
 import com.caochung.recruitment.constant.SuccessCode;
 import com.caochung.recruitment.domain.User;
 import com.caochung.recruitment.dto.request.LoginDTO;
+import com.caochung.recruitment.dto.request.RegisterDTO;
 import com.caochung.recruitment.dto.response.ResponseData;
 import com.caochung.recruitment.dto.response.LoginResponseDTO;
+import com.caochung.recruitment.dto.response.UserResponseDTO;
 import com.caochung.recruitment.exception.AppException;
-import com.caochung.recruitment.service.impl.UserServiceImpl;
+import com.caochung.recruitment.service.UserService;
+import com.caochung.recruitment.service.mapper.RoleMapper;
 import com.caochung.recruitment.util.SecurityUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -26,15 +30,17 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final SecurityUtil securityUtil;
-    private final UserServiceImpl userServiceImpl;
+    private final UserService userServiceImpl;
+    private final RoleMapper roleMapper;
 
     @Value("${caochung.jwt.refresh-token-validity-in-second}")
     private long refreshTokenExpiration;
 
-    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, UserServiceImpl userServiceImpl) {
+    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, UserService userServiceImpl, RoleMapper roleMapper) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.securityUtil = securityUtil;
         this.userServiceImpl = userServiceImpl;
+        this.roleMapper = roleMapper;
     }
 
     @PostMapping("/auth/login")
@@ -54,9 +60,10 @@ public class AuthController {
                         .id(user.getId())
                         .username(user.getName())
                         .email(user.getEmail())
+                        .role(roleMapper.toDTO(user.getRole()))
                         .build())
                 .build();
-        String accessToken = this.securityUtil.createAccessToken(authentication.getName(), loginResponseDTO.getUserInfo());
+        String accessToken = this.securityUtil.createAccessToken(authentication.getName(), loginResponseDTO);
         loginResponseDTO.setAccessToken(accessToken);
         String refreshToken = this.securityUtil.createRefreshToken(user.getEmail(), loginResponseDTO);
         this.userServiceImpl.updateUserToken(refreshToken, user.getEmail());
@@ -103,6 +110,7 @@ public class AuthController {
                         .id(user.getId())
                         .username(user.getName())
                         .email(user.getEmail())
+                        .role(roleMapper.toDTO(user.getRole()))
                         .build())
                 .build();
         return ResponseEntity.ok().body(ResponseData.success(loginResponseDTO, SuccessCode.GET_SUCCESS));
@@ -127,9 +135,10 @@ public class AuthController {
                         .id(user.getId())
                         .username(user.getName())
                         .email(user.getEmail())
+                        .role(roleMapper.toDTO(user.getRole()))
                         .build())
                 .build();
-        String accessToken = this.securityUtil.createAccessToken(email, loginResponseDTO.getUserInfo());
+        String accessToken = this.securityUtil.createAccessToken(email, loginResponseDTO);
         loginResponseDTO.setAccessToken(accessToken);
         String newRefreshToken = this.securityUtil.createRefreshToken(email, loginResponseDTO);
         this.userServiceImpl.updateUserToken(refreshToken, email);
@@ -144,5 +153,12 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
                 .body(ResponseData.success(loginResponseDTO, SuccessCode.LOGIN_SUCCESS));
+    }
+
+    @PostMapping("/auth/register")
+    public ResponseData<UserResponseDTO> registerUser(@Valid @RequestBody RegisterDTO registerDTO) {
+        UserResponseDTO userResponseDTO = this.userServiceImpl.register(registerDTO);
+        return ResponseData.success(userResponseDTO
+                , SuccessCode.CREATED_SUCCESS);
     }
 }

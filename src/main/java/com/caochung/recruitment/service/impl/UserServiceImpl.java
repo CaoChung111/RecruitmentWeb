@@ -1,13 +1,15 @@
 package com.caochung.recruitment.service.impl;
 
 import com.caochung.recruitment.constant.ErrorCode;
+import com.caochung.recruitment.domain.Role;
 import com.caochung.recruitment.domain.User;
+import com.caochung.recruitment.dto.request.RegisterDTO;
 import com.caochung.recruitment.dto.request.UserRequestDTO;
 import com.caochung.recruitment.dto.request.UserUpdateDTO;
 import com.caochung.recruitment.dto.response.PaginationResponseDTO;
 import com.caochung.recruitment.dto.response.UserResponseDTO;
 import com.caochung.recruitment.exception.AppException;
-import com.caochung.recruitment.repository.CompanyRepository;
+import com.caochung.recruitment.repository.RoleRepository;
 import com.caochung.recruitment.repository.UserRepository;
 import com.caochung.recruitment.service.UserService;
 import com.caochung.recruitment.service.mapper.UserMapper;
@@ -25,8 +27,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final CompanyRepository companyRepository;
     private final UserMapper userMapper;
+    private final RoleRepository roleRepository;
+
 
     @Override
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
@@ -36,6 +39,22 @@ public class UserServiceImpl implements UserService {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         userRequestDTO.setPassword(passwordEncoder.encode(userRequestDTO.getPassword()));
         User user = userMapper.toEntity(userRequestDTO);
+        User saveUser = userRepository.save(user);
+        return userMapper.toDto(saveUser);
+    }
+
+    @Override
+    public UserResponseDTO register(RegisterDTO registerDTO) {
+        if(userRepository.existsByEmail(registerDTO.getEmail())){
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        }
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        registerDTO.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
+
+        User user = userMapper.toEntity(registerDTO);
+        Role defaultRole = this.roleRepository.findByName("CANDIDATE");
+        user.setRole(defaultRole);
+
         User saveUser = userRepository.save(user);
         return userMapper.toDto(saveUser);
     }

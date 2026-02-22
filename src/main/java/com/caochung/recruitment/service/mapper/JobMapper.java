@@ -38,6 +38,8 @@ public abstract class JobMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract Job fromUpdateJob(JobRequestDTO jobRequestDTO,@MappingTarget Job job);
 
+    public abstract JobResponseDTO.JobCompany toDtoCompany(Company company);
+
     protected List<Skill> mapSkills(List<Long> skills) {
         if (skills == null || skills.isEmpty()) {
             return null;
