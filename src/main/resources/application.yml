@@ -2,9 +2,6 @@ spring:
   application:
     name: recruitment
   datasource:
-#    url: jdbc:mysql://localhost:3306/recruitment
-#    username: root
-#    password: 123456
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
