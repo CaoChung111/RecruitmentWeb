@@ -74,6 +74,7 @@ public class AuthController {
                 .secure(true)
                 .path("/")
                 .maxAge(refreshTokenExpiration)
+                .sameSite("None")
                 .build();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
@@ -94,6 +95,7 @@ public class AuthController {
                 .secure(true)
                 .path("/")
                 .maxAge(0)
+                .sameSite("None")
                 .build();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, deleteSpringCookie.toString())
@@ -149,6 +151,7 @@ public class AuthController {
                 .secure(true)
                 .path("/")
                 .maxAge(refreshTokenExpiration)
+                .sameSite("None")
                 .build();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
