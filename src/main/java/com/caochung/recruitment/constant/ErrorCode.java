@@ -38,7 +38,11 @@ public enum ErrorCode {
     PERMISSION_EXISTED("Permission already existed",  HttpStatus.BAD_REQUEST),
 
     ROLE_EXISTED("Role already existed",  HttpStatus.BAD_REQUEST),
-    ROLE_NOT_FOUND("Role not found",  HttpStatus.NOT_FOUND),;
+    ROLE_NOT_FOUND("Role not found",  HttpStatus.NOT_FOUND),
+
+    SUBSCRIBER_EXISTED("Subscriber already existed",  HttpStatus.BAD_REQUEST),
+    SUBSCRIBER_NOT_FOUND("Subscriber not found",  HttpStatus.NOT_FOUND),;
+
 
     private final HttpStatus httpStatus;
     private final String message;

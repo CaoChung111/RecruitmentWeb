@@ -29,11 +29,10 @@ public class CompanyServiceImpl implements CompanyService {
     private final CloudinaryService cloudinaryService;
 
     @Override
-    public CompanyResponseDTO createCompany(CompanyRequestDTO requestDTO, MultipartFile imageFile){
+    public CompanyResponseDTO createCompany(CompanyRequestDTO requestDTO){
         if(companyRepository.existsByName(requestDTO.getName())){
             throw new AppException(ErrorCode.COMPANY_EXISTED);
         }
-        requestDTO.setLogo(cloudinaryService.uploadFile(imageFile));
         Company company = companyMapper.toEntity(requestDTO);
         Company saveCompany = this.companyRepository.save(company);
         return companyMapper.toDto(saveCompany);

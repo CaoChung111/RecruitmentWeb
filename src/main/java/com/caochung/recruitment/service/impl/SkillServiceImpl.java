@@ -3,12 +3,14 @@ package com.caochung.recruitment.service.impl;
 import com.caochung.recruitment.constant.ErrorCode;
 import com.caochung.recruitment.domain.Job;
 import com.caochung.recruitment.domain.Skill;
+import com.caochung.recruitment.domain.Subscriber;
 import com.caochung.recruitment.dto.request.SkillRequestDTO;
 import com.caochung.recruitment.dto.response.PaginationResponseDTO;
 import com.caochung.recruitment.dto.response.SkillResponseDTO;
 import com.caochung.recruitment.exception.AppException;
 import com.caochung.recruitment.repository.JobRepository;
 import com.caochung.recruitment.repository.SkillRepository;
+import com.caochung.recruitment.repository.SubscriberRepository;
 import com.caochung.recruitment.service.SkillService;
 import com.caochung.recruitment.service.mapper.SkillMapper;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import java.util.List;
 public class SkillServiceImpl implements SkillService {
     private final SkillRepository skillRepository;
     private final JobRepository jobRepository;
+    private final SubscriberRepository subscriberRepository;
     private final SkillMapper skillMapper;
 
     @Override
@@ -70,9 +73,15 @@ public class SkillServiceImpl implements SkillService {
     public void deleteSkill(Long id) {
         Skill skill = this.skillRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.SKILL_NOT_FOUND));
+
         List<Job> jobs = this.jobRepository.findAllBySkillsContaining(skill);
         for (Job j : jobs) {
             j.getSkills().remove(skill);
+        }
+
+        List<Subscriber> subscribers = this.subscriberRepository.findAllBySkillsContaining(skill);
+        for (Subscriber s : subscribers) {
+            s.getSkills().remove(skill);
         }
         this.skillRepository.delete(skill);
     }

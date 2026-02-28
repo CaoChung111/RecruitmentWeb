@@ -4,6 +4,8 @@ import com.caochung.recruitment.constant.LevelEnum;
 import com.caochung.recruitment.util.annotation.JobStatus;
 import com.caochung.recruitment.util.annotation.Level;
 import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -29,7 +31,7 @@ public class JobRequestDTO {
 
     private Integer quantity;
 
-    @Level(anyOf = {FRESHER, INTERN, JUNIOR, MIDDLE, SENIOR})
+    @Level(anyOf = {FRESHER, INTERN, JUNIOR, MIDDLE, SENIOR, LEAD})
     private String level;
 
     private String description;

@@ -12,7 +12,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Mapper(componentModel = "spring")
 public abstract class RoleMapper {
@@ -29,10 +31,10 @@ public abstract class RoleMapper {
 
     public abstract void fromUpdate(RoleRequestDTO roleRequestDTO,@MappingTarget Role role);
 
-    protected List<Permission> mapRole(List<Long> permissionIds){
+    protected Set<Permission> mapRole(List<Long> permissionIds){
         if(permissionIds == null || permissionIds.isEmpty()){
             return null;
         }
-        return permissionRepository.findAllById(permissionIds);
+        return new HashSet<>(permissionRepository.findAllById(permissionIds));
     }
 }

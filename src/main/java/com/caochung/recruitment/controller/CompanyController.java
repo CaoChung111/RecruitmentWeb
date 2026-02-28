@@ -29,12 +29,11 @@ public class CompanyController {
         this.companyServiceImpl = companyServiceImpl;
     }
 
-    @PostMapping(value = "/companies", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping("/companies")
     @PreAuthorize(SecurityConstant.COMPANY_CREATE)
     public ResponseData<CompanyResponseDTO> createCompany(
-            @Valid @RequestPart("company") CompanyRequestDTO companyRequestDTO,
-            @RequestPart("file") MultipartFile file){
-        CompanyResponseDTO company = this.companyServiceImpl.createCompany(companyRequestDTO, file);
+            @Valid @RequestBody CompanyRequestDTO companyRequestDTO) {
+        CompanyResponseDTO company = this.companyServiceImpl.createCompany(companyRequestDTO);
         return ResponseData.success(company, SuccessCode.CREATED_SUCCESS);
     }
 

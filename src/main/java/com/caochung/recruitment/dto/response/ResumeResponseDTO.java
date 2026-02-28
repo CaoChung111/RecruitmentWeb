@@ -32,6 +32,9 @@ public class ResumeResponseDTO {
     @JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss", timezone = "UTC")
     private Instant createdAt;
 
+    @JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss", timezone = "UTC")
+    private Instant updatedAt;
+
     @Getter @Setter
     public static class UserResume {
         private Long id;

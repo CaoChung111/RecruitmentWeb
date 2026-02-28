@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; padding: 20px;}
+        .container { max-width: 600px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-bottom: 20px; }
+        .job-card { border: 1px solid #e1e1e1; padding: 15px; margin-bottom: 15px; border-radius: 5px; background-color: #fafafa; }
+        .job-title { color: #0056b3; font-size: 18px; font-weight: bold; margin-bottom: 5px; }
+        .company-name { color: #666; font-style: italic; font-size: 14px; margin-bottom: 10px; }
+        .salary { color: #d9534f; font-weight: bold; }
+        .footer { margin-top: 30px; font-size: 12px; color: #888; text-align: center; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h2 style="color: #0056b3;">Thông báo việc làm mới</h2>
+    </div>
+
+    <p>Chào <strong th:text="${name}">Ứng viên</strong>,</p>
+    <p>Hệ thống vừa tìm thấy <strong><span th:text="${jobs.size()}">0</span></strong> công việc mới rất phù hợp với các kỹ năng mà bạn đang quan tâm:</p>
+
+    <div th:each="job : ${jobs}" class="job-card">
+        <div class="job-title" th:text="${job.name}">Tên công việc</div>
+        <div class="company-name" th:text="'Công ty: ' + ${job.company.name}">Tên công ty</div>
+
+        <p style="margin: 5px 0;">💰 Lương: <span class="salary" th:text="${#numbers.formatDecimal(job.salary, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">Thỏa thuận</span></p>
+        <p style="margin: 5px 0;">📍 Địa điểm: <span th:text="${job.location}">Cập nhật sau</span></p>
+    </div>
+
+    <p>Chúc bạn sớm tìm được công việc ưng ý!</p>
+    <p>Trân trọng,<br><strong>Đội ngũ Tuyển Dụng</strong></p>
+
+    <div class="footer">
+        <p>Bạn nhận được email này vì đã đăng ký nhận thông báo việc làm trên hệ thống của chúng tôi.</p>
+    </div>
+</div>
+</body>
+</html>

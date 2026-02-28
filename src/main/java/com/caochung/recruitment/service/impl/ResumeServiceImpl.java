@@ -1,6 +1,7 @@
 package com.caochung.recruitment.service.impl;
 
 import com.caochung.recruitment.constant.ErrorCode;
+import com.caochung.recruitment.constant.ResumeStatusEnum;
 import com.caochung.recruitment.domain.Company;
 import com.caochung.recruitment.domain.Resume;
 import com.caochung.recruitment.domain.User;
@@ -35,8 +36,7 @@ public class ResumeServiceImpl implements ResumeService {
     private final UserRepository userRepository;
 
     @Override
-    public ResumeResponseDTO createResume(ResumeRequestDTO resumeRequestDTO, MultipartFile cv) {
-        resumeRequestDTO.setUrl(cloudinaryService.uploadFile(cv));
+    public ResumeResponseDTO createResume(ResumeRequestDTO resumeRequestDTO) {
         Resume resume = this.resumeMapper.toResume(resumeRequestDTO);
         return resumeMapper.toDTO(this.resumeRepository.save(resume));
     }
@@ -55,20 +55,20 @@ public class ResumeServiceImpl implements ResumeService {
                 () -> new AppException(ErrorCode.RESUME_NOT_FOUND));
         this.resumeRepository.delete(resume);
     }
-
-    @Override
-    public PaginationResponseDTO getResumes(Specification<Resume> specification, Pageable pageable) {
-        Page<Resume> resumePage = this.resumeRepository.findAll(specification, pageable);
-        List<ResumeResponseDTO> resumeResponseDTOS = this.resumeMapper.toDTO(resumePage.getContent());
-
-        PaginationResponseDTO.Meta meta = PaginationResponseDTO.Meta.builder()
-                .page(pageable.getPageNumber()+1)
-                .pageSize(pageable.getPageSize())
-                .totalItems(resumePage.getTotalElements())
-                .totalPages(resumePage.getTotalPages())
-                .build();
-        return new PaginationResponseDTO(meta, resumeResponseDTOS);
-    }
+//
+//    @Override
+//    public PaginationResponseDTO getResumes(Specification<Resume> specification, Pageable pageable) {
+//        Page<Resume> resumePage = this.resumeRepository.findAll(specification, pageable);
+//        List<ResumeResponseDTO> resumeResponseDTOS = this.resumeMapper.toDTO(resumePage.getContent());
+//
+//        PaginationResponseDTO.Meta meta = PaginationResponseDTO.Meta.builder()
+//                .page(pageable.getPageNumber()+1)
+//                .pageSize(pageable.getPageSize())
+//                .totalItems(resumePage.getTotalElements())
+//                .totalPages(resumePage.getTotalPages())
+//                .build();
+//        return new PaginationResponseDTO(meta, resumeResponseDTOS);
+//    }
 
     @Override
     public ResumeResponseDTO getResumeById(Long id) {
@@ -96,22 +96,22 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
-    public PaginationResponseDTO getResumeByCompany(Specification<Resume> specification, Pageable pageable) {
+    public PaginationResponseDTO getResumes(Specification<Resume> specification, Pageable pageable) {
         String email = SecurityUtil.getCurrentUserLogin().orElseThrow(()->new AppException(ErrorCode.UNAUTHENTICATED));
 
-        User hrUser = this.userRepository.findByEmail(email); // Giả sử repo có hàm này trả về User
-        if (hrUser == null) {
+        User user = this.userRepository.findByEmail(email);
+        if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
-        if (hrUser.getCompany() == null) {
-            throw new AppException(ErrorCode.COMPANY_NOT_FOUND);
+
+        Specification<Resume> finalSpec = specification;
+        if (user.getCompany() != null){
+            Specification<Resume> spec = (root, query, cb) ->
+                    cb.equal(root.get("job").get("company").get("id"), user.getCompany().getId());
+            finalSpec = (specification == null) ? spec : specification.and(spec);
         }
 
-        Specification<Resume> spec = (root, query, cb) ->
-                cb.equal(root.get("job").get("company").get("id"), hrUser.getCompany().getId());
-
-        Specification<Resume> finalSpec = (specification == null) ? spec : specification.and(spec);
-        Page<Resume> resumePage = this.resumeRepository.findAll(spec, pageable);
+        Page<Resume> resumePage = this.resumeRepository.findAll(finalSpec, pageable);
         List<ResumeResponseDTO> resumeResponseDTOS = this.resumeMapper.toDTO(resumePage.getContent());
 
         PaginationResponseDTO.Meta meta = PaginationResponseDTO.Meta.builder()

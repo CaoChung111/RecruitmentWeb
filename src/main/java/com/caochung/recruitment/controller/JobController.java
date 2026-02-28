@@ -26,7 +26,14 @@ public class JobController {
     public ResponseData<PaginationResponseDTO> getJobs(
             @Filter Specification<Job> specification,
             Pageable pageable) {
-        return ResponseData.success(this.jobService.getJobs(specification, pageable), SuccessCode.GET_SUCCESS);
+        return ResponseData.success(this.jobService.getJobs(specification, pageable, false), SuccessCode.GET_SUCCESS);
+    }
+
+    @GetMapping("jobs/company")
+    public ResponseData<PaginationResponseDTO> getJobsCompany(
+            @Filter Specification<Job> specification,
+            Pageable pageable) {
+        return ResponseData.success(this.jobService.getJobs(specification, pageable, true), SuccessCode.GET_SUCCESS);
     }
 
     @GetMapping("/jobs/{id}")

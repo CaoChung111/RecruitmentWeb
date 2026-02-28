@@ -12,7 +12,7 @@ import java.util.List;
 public interface JobService {
     JobResponseDTO createJob(JobRequestDTO jobRequestDTO);
 
-    PaginationResponseDTO getJobs(Specification<Job> specification, Pageable pageable);
+    PaginationResponseDTO getJobs(Specification<Job> specification, Pageable pageable, boolean isDashBoard);
 
     JobResponseDTO getJobById(Long id);
 

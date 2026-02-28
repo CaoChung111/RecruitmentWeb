@@ -2,9 +2,12 @@ spring:
   application:
     name: recruitment
   datasource:
-    url: jdbc:mysql://localhost:3306/recruitment
-    username: root
-    password: 123456
+#    url: jdbc:mysql://localhost:3306/recruitment
+#    username: root
+#    password: 123456
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -21,16 +24,29 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
+  # Mail config
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 #config jwt
 caochung:
   jwt:
-    base64-secret: o6mTauvaIYPb0FLpjVb3T6HDsUVpZNeLuRI4cYsFUAs15AXqZoQ1NEsGcatFLQVRnTl/J/scJK8Efws8fIFjoA==
-# expiration 1 day
-    access-token-validity-in-second: 86400
+    base64-secret: ${JWT_SECRET}
+    # expiration 6h
+    access-token-validity-in-second: 21600
     refresh-token-validity-in-second: 86400
 
 #cloudinary config
 cloudinary:
-  cloud-name: drzkudoix
-  api-key: 761716841287235
-  api-secret: ZqrNqWiIQSvRbn2db5-nmcH5iJ4
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}

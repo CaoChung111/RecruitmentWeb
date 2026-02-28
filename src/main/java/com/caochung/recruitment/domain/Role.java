@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "roles")
@@ -22,7 +23,7 @@ public class Role extends Base{
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "permission_role", joinColumns = @JoinColumn(name = "role_id"),
     inverseJoinColumns = @JoinColumn(name = "permission_id"))
-    private List<Permission> permissions;
+    private Set<Permission> permissions;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "role")
     private List<User> users;

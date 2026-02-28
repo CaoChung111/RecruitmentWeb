@@ -15,4 +15,7 @@ public class Skill extends Base{
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "skills")
     private List<Job> jobs;
+
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "skills")
+    private List<Subscriber> subscribers;
 }

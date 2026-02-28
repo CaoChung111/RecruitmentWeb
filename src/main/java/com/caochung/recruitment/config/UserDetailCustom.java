@@ -3,6 +3,7 @@ package com.caochung.recruitment.config;
 import com.caochung.recruitment.domain.User;
 import com.caochung.recruitment.service.impl.UserServiceImpl;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 
 @Component("userDetailService")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserDetailCustom implements UserDetailsService {
 
     private final UserServiceImpl userServiceImpl;

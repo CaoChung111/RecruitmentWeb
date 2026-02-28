@@ -5,6 +5,7 @@ public enum LevelEnum {
     FRESHER,
     JUNIOR,
     MIDDLE,
-    SENIOR;
+    SENIOR,
+    LEAD;
     LevelEnum() {}
 }

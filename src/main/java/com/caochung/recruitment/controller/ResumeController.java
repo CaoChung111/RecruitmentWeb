@@ -35,11 +35,10 @@ public class ResumeController {
         return ResponseData.success(paginationResponseDTO, SuccessCode.GET_SUCCESS);
     }
 
-    @PostMapping(value = "/resumes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/resumes")
     @PreAuthorize(SecurityConstant.RESUME_CREATE)
-    public ResponseData<ResumeResponseDTO> createResume(@Valid @RequestPart("resume") ResumeRequestDTO resumeRequestDTO,
-                                                        @RequestPart("file") MultipartFile cv){
-        ResumeResponseDTO resumeResponseDTO = this.resumeService.createResume(resumeRequestDTO, cv);
+    public ResponseData<ResumeResponseDTO> createResume(@Valid @RequestBody ResumeRequestDTO resumeRequestDTO){
+        ResumeResponseDTO resumeResponseDTO = this.resumeService.createResume(resumeRequestDTO);
         return ResponseData.success(resumeResponseDTO, SuccessCode.CREATED_SUCCESS);
     }
 
@@ -71,12 +70,12 @@ public class ResumeController {
         return ResponseData.success(responseDTO, SuccessCode.GET_SUCCESS);
     }
 
-    @GetMapping("/resumes/by-company")
-    @PreAuthorize(SecurityConstant.RESUME_VIEW_COMPANY)
-    public ResponseData<PaginationResponseDTO> getResumesByCompany(
-            @Filter Specification<Resume> specification,
-            Pageable pageable){
-        PaginationResponseDTO paginationResponseDTO = this.resumeService.getResumeByCompany(specification,pageable);
-        return ResponseData.success(paginationResponseDTO, SuccessCode.GET_SUCCESS);
-    }
+//    @GetMapping("/resumes/by-company")
+//    @PreAuthorize(SecurityConstant.RESUME_VIEW_COMPANY)
+//    public ResponseData<PaginationResponseDTO> getResumesByCompany(
+//            @Filter Specification<Resume> specification,
+//            Pageable pageable){
+//        PaginationResponseDTO paginationResponseDTO = this.resumeService.getResumeByCompany(specification,pageable);
+//        return ResponseData.success(paginationResponseDTO, SuccessCode.GET_SUCCESS);
+//    }
 }

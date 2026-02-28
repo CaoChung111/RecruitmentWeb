@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 public interface ResumeService {
-    ResumeResponseDTO createResume(ResumeRequestDTO resumeRequestDTO, MultipartFile file);
+    ResumeResponseDTO createResume(ResumeRequestDTO resumeRequestDTO);
 
     void updateResume(Long id, ResumeUpdateDTO resumeUpdateDTO);
 
@@ -25,6 +25,6 @@ public interface ResumeService {
 
     PaginationResponseDTO getResumeByUser(Pageable pageable);
 
-    PaginationResponseDTO getResumeByCompany(Specification<Resume> specification ,Pageable pageable);
+//    PaginationResponseDTO getResumeByCompany(Specification<Resume> specification ,Pageable pageable);
 
 }

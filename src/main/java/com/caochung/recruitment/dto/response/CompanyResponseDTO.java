@@ -1,5 +1,6 @@
 package com.caochung.recruitment.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +18,9 @@ public class CompanyResponseDTO {
 
     private String logo;
 
+    @JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss", timezone = "UTC")
     private Instant createdAt;
 
+    @JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss", timezone = "UTC")
     private Instant updatedAt;
 }

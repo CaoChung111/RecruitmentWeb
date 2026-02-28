@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Component
@@ -60,7 +61,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             admin.setName("SUPER_ADMIN");
             admin.setDescription("Quản trị viên hệ thống - Full Quyền");
             admin.setActive(true);
-            admin.setPermissions(allPermissions);
+            admin.setPermissions(new HashSet<>(allPermissions));
             this.roleRepository.save(admin);
             System.out.println(">>> Initialized ROLE: SUPER_ADMIN");
         }
@@ -94,7 +95,7 @@ public class DatabaseInitializer implements CommandLineRunner {
                     .filter(p -> candidatePermissions.contains(p.getName()))
                     .toList();
 
-            candidate.setPermissions(permissions);
+            candidate.setPermissions(new HashSet<>(permissions));
             this.roleRepository.save(candidate);
             System.out.println(">>> Initialized ROLE: CANDIDATE");
         }
@@ -130,7 +131,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             List<Permission> permissions = allPermissions.stream()
                     .filter(p -> recruiterPermissions.contains(p.getName()))
                     .toList();
-            recruiter.setPermissions(permissions);
+            recruiter.setPermissions(new HashSet<>(allPermissions));
             this.roleRepository.save(recruiter);
             System.out.println(">>> Initialized ROLE: RECRUITER");
         }

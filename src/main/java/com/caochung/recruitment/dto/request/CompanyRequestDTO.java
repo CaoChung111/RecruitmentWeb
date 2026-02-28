@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter @Setter
 @Builder
 public class CompanyRequestDTO {
-    @NotBlank(message = "Tên công ty không được để trống")
+    @NotBlank(message = "Name cannot be empty")
     private String name;
 
     private String description;

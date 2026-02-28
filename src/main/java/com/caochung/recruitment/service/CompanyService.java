@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface CompanyService {
-    CompanyResponseDTO createCompany(CompanyRequestDTO requestDTO, MultipartFile image);
+    CompanyResponseDTO createCompany(CompanyRequestDTO requestDTO);
 
     PaginationResponseDTO getAllCompanies(Specification<Company> specification, Pageable pageable);
 

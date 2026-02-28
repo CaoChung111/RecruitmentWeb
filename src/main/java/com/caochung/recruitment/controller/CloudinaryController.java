@@ -23,8 +23,15 @@ public class CloudinaryController {
 
     @PostMapping("/uploads")
     @PreAuthorize(SecurityConstant.FILE_UPLOAD)
-    public ResponseData<?> uploadFile(@RequestParam("files") MultipartFile[] files) throws IOException {
+    public ResponseData<?> uploadFiles(@RequestParam("files") MultipartFile[] files) throws IOException {
         List<String> urls = cloudinaryService.uploadFiles(files);
         return ResponseData.success(urls ,SuccessCode.UPLOAD_SUCCESS);
+    }
+
+    @PostMapping("/upload")
+    @PreAuthorize(SecurityConstant.FILE_UPLOAD)
+    public ResponseData<?> uploadFile(@RequestParam("file") MultipartFile file){
+        String url = cloudinaryService.uploadFile(file);
+        return ResponseData.success(url ,SuccessCode.UPLOAD_SUCCESS);
     }
 }

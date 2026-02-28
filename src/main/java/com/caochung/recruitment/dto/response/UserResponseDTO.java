@@ -19,6 +19,8 @@ public class UserResponseDTO {
     private String address;
     @JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss", timezone = "UTC")
     private Instant createdAt;
+    @JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss", timezone = "UTC")
+    private Instant updatedAt;
     private CompanyResponseDTO company;
     private RoleResponseDTO role;
 

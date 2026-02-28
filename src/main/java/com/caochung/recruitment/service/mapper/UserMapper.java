@@ -53,4 +53,16 @@ public abstract class UserMapper {
         }
         return roleRepository.findById(id).orElseThrow(()-> new AppException(ErrorCode.ROLE_NOT_FOUND));
     }
+
+    @AfterMapping
+    protected void mapCompany(UserUpdateDTO userUpdateDTO, @MappingTarget User user) {
+        if (userUpdateDTO.getCompanyId() != null) {
+            Company company = new Company();
+            company.setId(userUpdateDTO.getCompanyId());
+            user.setCompany(company);
+        } else {
+            // Nếu companyId gửi lên là null, ta chủ động set null cho user
+            user.setCompany(null);
+        }
+    }
 }
