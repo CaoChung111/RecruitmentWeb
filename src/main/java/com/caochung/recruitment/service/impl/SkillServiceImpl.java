@@ -18,11 +18,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SkillServiceImpl implements SkillService {
     private final SkillRepository skillRepository;
     private final JobRepository jobRepository;
@@ -30,6 +32,7 @@ public class SkillServiceImpl implements SkillService {
     private final SkillMapper skillMapper;
 
     @Override
+    @Transactional
     public SkillResponseDTO createSkill(SkillRequestDTO skillRequestDTO) {
         if(skillRepository.existsByName(skillRequestDTO.getName())){
             throw new AppException(ErrorCode.SKILL_EXISTED);
@@ -59,6 +62,7 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
+    @Transactional
     public void updateSkill(Long id, SkillRequestDTO skillRequestDTO) {
         Skill skill = this.skillRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.SKILL_NOT_FOUND));
@@ -66,22 +70,22 @@ public class SkillServiceImpl implements SkillService {
             throw new AppException(ErrorCode.SKILL_EXISTED);
         }
         skill.setName(skillRequestDTO.getName());
-        this.skillRepository.save(skill);
     }
 
     @Override
+    @Transactional
     public void deleteSkill(Long id) {
         Skill skill = this.skillRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.SKILL_NOT_FOUND));
 
         List<Job> jobs = this.jobRepository.findAllBySkillsContaining(skill);
-        for (Job j : jobs) {
-            j.getSkills().remove(skill);
+        if (!jobs.isEmpty()) {
+            throw new AppException(ErrorCode.SKILL_HAS_USED);
         }
 
         List<Subscriber> subscribers = this.subscriberRepository.findAllBySkillsContaining(skill);
-        for (Subscriber s : subscribers) {
-            s.getSkills().remove(skill);
+        if (!subscribers.isEmpty()) {
+            throw new AppException(ErrorCode.SKILL_HAS_USED);
         }
         this.skillRepository.delete(skill);
     }

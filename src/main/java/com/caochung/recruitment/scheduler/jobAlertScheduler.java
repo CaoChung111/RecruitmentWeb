@@ -1,5 +1,6 @@
 package com.caochung.recruitment.scheduler;
 
+import com.caochung.recruitment.constant.JobStatusEnum;
 import com.caochung.recruitment.domain.Job;
 import com.caochung.recruitment.domain.Subscriber;
 import com.caochung.recruitment.repository.JobRepository;
@@ -27,7 +28,7 @@ public class jobAlertScheduler {
     @Transactional(readOnly = true)
     public void scheduledJobAlertEmail() {
         log.info("Scheduling job alert email");
-        List<Job> jobs = jobRepository.findAll();
+        List<Job> jobs = jobRepository.findAllByActive(JobStatusEnum.OPEN);
         List<Subscriber> subscribers = subscriberRepository.findAll();
 
         for (Subscriber subscriber : subscribers) {

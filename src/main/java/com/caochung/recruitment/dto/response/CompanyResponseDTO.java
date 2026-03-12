@@ -18,6 +18,8 @@ public class CompanyResponseDTO {
 
     private String logo;
 
+    private String status;
+
     @JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss", timezone = "UTC")
     private Instant createdAt;
 

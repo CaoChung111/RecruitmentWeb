@@ -4,6 +4,10 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
+configurations.all {
+    exclude(group = "commons-logging", module = "commons-logging")
+}
+
 group = "com.caochung"
 version = "0.0.1-SNAPSHOT"
 description = "Recruitment Website"
@@ -29,6 +33,7 @@ dependencies {
     implementation("com.cloudinary:cloudinary-http44:1.36.0")
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.15")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.security:spring-security-test")

@@ -12,6 +12,8 @@ public enum PermissionEnum {
     COMPANY_DELETE("COMPANY_DELETE", "/api/v1/companies/{id}", "DELETE", "COMPANIES"),
     COMPANY_VIEW_DETAIL("COMPANY_VIEW_DETAIL", "/api/v1/companies/{id}", "GET", "COMPANIES"),
     COMPANY_VIEW_ALL("COMPANY_VIEW_ALL", "/api/v1/companies", "GET", "COMPANIES"),
+    COMPANY_VIEW_INACTIVE("COMPANY_VIEW_INACTIVE", "/api/v1/companies/trash", "GET", "COMPANIES"),
+    COMPANY_RESTORE("COMPANY_RESTORE", "/api/v1/companies/{id}/restore", "PUT", "COMPANIES"),
 
     // 2. JOBS
     JOB_CREATE("JOB_CREATE", "/api/v1/jobs", "POST", "JOBS"),
@@ -57,6 +59,9 @@ public enum PermissionEnum {
     USER_DELETE("USER_DELETE", "/api/v1/users/{id}", "DELETE", "USERS"),
     USER_VIEW_DETAIL("USER_VIEW_DETAIL", "/api/v1/users/{id}", "GET", "USERS"),
     USER_VIEW_ALL("USER_VIEW_ALL", "/api/v1/users", "GET", "USERS"),
+    USER_VIEW_DISABLE("USER_VIEW_DISABLE", "/api/v1/users/trash", "GET", "USERS"),
+    USER_RESTORE("USER_RESTORE", "/api/v1/users/{id}/restore", "PUT", "USERS"),
+
 
     // 8. SUBSCRIBERS
     SUBSCRIBER_CREATE("SUBSCRIBER_CREATE", "/api/v1/subscribers", "POST", "SUBSCRIBERS"),

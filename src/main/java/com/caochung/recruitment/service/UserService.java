@@ -34,4 +34,8 @@ public interface UserService {
     void updateUserToken(String token, String email);
 
     User getUserByRefreshTokenAndEmail(String refreshToken,  String email);
+
+    PaginationResponseDTO getAllDisableUser(Pageable pageable);
+
+    void restoreUserById(Long id);
 }

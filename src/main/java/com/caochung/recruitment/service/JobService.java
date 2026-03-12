@@ -7,8 +7,6 @@ import com.caochung.recruitment.dto.response.PaginationResponseDTO;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.List;
-
 public interface JobService {
     JobResponseDTO createJob(JobRequestDTO jobRequestDTO);
 

@@ -13,6 +13,7 @@ import com.caochung.recruitment.service.UserService;
 import com.caochung.recruitment.service.mapper.RoleMapper;
 import com.caochung.recruitment.util.SecurityUtil;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -23,10 +24,14 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1")
+@RequiredArgsConstructor
+@Tag(name = "Authentication & Authorization", description = "APIs for user authentication, registration, and token management.")
 public class AuthController {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final SecurityUtil securityUtil;
@@ -36,13 +41,7 @@ public class AuthController {
     @Value("${caochung.jwt.refresh-token-validity-in-second}")
     private long refreshTokenExpiration;
 
-    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, UserService userServiceImpl, RoleMapper roleMapper) {
-        this.authenticationManagerBuilder = authenticationManagerBuilder;
-        this.securityUtil = securityUtil;
-        this.userServiceImpl = userServiceImpl;
-        this.roleMapper = roleMapper;
-    }
-
+    @Operation(summary = "User Login", description = "Authenticates a user with username and password, returning access and refresh tokens. Sets refresh token as an HTTP-only cookie.")
     @PostMapping("/auth/login")
     public ResponseEntity<ResponseData<LoginResponseDTO>> Login(@Valid @RequestBody LoginDTO loginDTO) {
         //Nạp input vào Security
@@ -81,6 +80,7 @@ public class AuthController {
                 .body(ResponseData.success(loginResponseDTO, SuccessCode.LOGIN_SUCCESS));
     }
 
+    @Operation(summary = "User Logout", description = "Logs out the current user by invalidating their refresh token and clearing the refresh token cookie. Requires authentication.")
     @PostMapping("/auth/logout")
     public ResponseEntity<ResponseData<?>> Logout() {
         String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
@@ -102,6 +102,7 @@ public class AuthController {
                 .body(ResponseData.success(SuccessCode.LOGOUT_SUCCESS));
     }
 
+    @Operation(summary = "Get Current User Account", description = "Retrieves the details of the currently authenticated user. Requires authentication.")
     @GetMapping("/auth/account")
     public ResponseEntity<ResponseData<LoginResponseDTO>> getAccount() {
         String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
@@ -118,6 +119,7 @@ public class AuthController {
         return ResponseEntity.ok().body(ResponseData.success(loginResponseDTO, SuccessCode.GET_SUCCESS));
     }
 
+    @Operation(summary = "Refresh Access Token", description = "Generates a new access token using a valid refresh token provided in an HTTP-only cookie. Also issues a new refresh token. Requires a valid refresh token.")
     @GetMapping("/auth/refresh")
     public ResponseEntity<ResponseData<LoginResponseDTO>> getRefreshToken(
             @CookieValue(name = "refreshToken", defaultValue = "defaultRefreshToken") String refreshToken) {
@@ -158,6 +160,7 @@ public class AuthController {
                 .body(ResponseData.success(loginResponseDTO, SuccessCode.LOGIN_SUCCESS));
     }
 
+    @Operation(summary = "Register New User", description = "Registers a new user account with the provided details. No authentication required.")
     @PostMapping("/auth/register")
     public ResponseData<UserResponseDTO> registerUser(@Valid @RequestBody RegisterDTO registerDTO) {
         UserResponseDTO userResponseDTO = this.userServiceImpl.register(registerDTO);

@@ -1,0 +1,21 @@
+${AnsiColor.BRIGHT_BLUE}
+ ██████╗  █████╗  ██████╗      ██████╗██╗  ██╗██╗   ██╗███╗   ██╗ ██████╗
+██╔════╝ ██╔══██╗██╔═══██╗    ██╔════╝██║  ██║██║   ██║████╗  ██║██╔════╝
+██║      ███████║██║   ██║    ██║     ███████║██║   ██║██╔██╗ ██║██║  ███╗
+██║      ██╔══██║██║   ██║    ██║     ██╔══██║██║   ██║██║╚██╗██║██║   ██║
+╚██████╗ ██║  ██║╚██████╔╝    ╚██████╗██║  ██║╚██████╔╝██║ ╚████║╚██████╔╝
+ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝      ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝
+${AnsiColor.BRIGHT_MAGENTA}
+╔══════════════════════════════════════════════════════════════╗
+${AnsiColor.BRIGHT_YELLOW}        🚀  RECRUITMENT SYSTEM PLATFORM STARTING...  🚀
+${AnsiColor.BRIGHT_MAGENTA}╠══════════════════════════════════════════════════════════════╣
+${AnsiColor.BRIGHT_WHITE}   👨‍💻 Lead Developer : ${AnsiColor.BRIGHT_CYAN}Cao Chung
+${AnsiColor.BRIGHT_WHITE}   ⚙️  Framework      : ${AnsiColor.BRIGHT_GREEN}Spring Boot v${spring-boot.version}
+${AnsiColor.BRIGHT_WHITE}   🗄️  Architecture   : ${AnsiColor.BRIGHT_BLUE}RESTful API + JWT + Security
+${AnsiColor.BRIGHT_WHITE}   🌐 Environment     : ${AnsiColor.BRIGHT_MAGENTA}${spring.profiles.active:default}
+${AnsiColor.BRIGHT_MAGENTA}╠══════════════════════════════════════════════════════════════╣
+${AnsiColor.BRIGHT_GREEN}   ✓ System initializing...
+${AnsiColor.BRIGHT_GREEN}   ✓ Loading modules...
+${AnsiColor.BRIGHT_GREEN}   ✓ Ready to serve requests!
+${AnsiColor.BRIGHT_MAGENTA}╚══════════════════════════════════════════════════════════════╝
+${AnsiColor.DEFAULT}

@@ -2,12 +2,14 @@ package com.caochung.recruitment.dto.request;
 
 import com.caochung.recruitment.domain.Company;
 import com.caochung.recruitment.util.annotation.Gender;
+import com.caochung.recruitment.util.annotation.UserStatus;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
 import static com.caochung.recruitment.constant.GenderEnum.*;
+import static com.caochung.recruitment.constant.UserStatusEnum.*;
 
 @Getter @Setter
 public class UserUpdateDTO {

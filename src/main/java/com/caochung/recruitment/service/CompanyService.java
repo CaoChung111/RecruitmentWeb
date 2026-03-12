@@ -9,6 +9,7 @@ import com.caochung.recruitment.exception.AppException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -24,4 +25,9 @@ public interface CompanyService {
     void updateCompany(Long id, CompanyRequestDTO requestDTO);
 
     void deleteCompany(Long id);
+
+    PaginationResponseDTO getAllInactiveCompanies(Pageable pageable);
+
+    @Transactional
+    void restoreCompanyById(Long id);
 }

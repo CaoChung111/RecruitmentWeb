@@ -45,6 +45,7 @@ public class SecurityConfiguration {
         String[] whiteList = {
                 "/",
                 "/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/register", "/storage/**",
+                "/swagger-ui/**", "/v3/api-docs/**",
         };
         http
                 .csrf(s-> s.disable())

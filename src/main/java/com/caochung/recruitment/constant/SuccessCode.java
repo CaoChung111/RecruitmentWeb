@@ -9,6 +9,7 @@ public enum SuccessCode {
     CREATED_SUCCESS(HttpStatus.CREATED,"Created success"),
     PUT_SUCCESS(HttpStatus.OK,"Put Success"),
     DELETE_SUCCESS(HttpStatus.OK,"Delete Success"),
+    RESTORE_SUCCESS(HttpStatus.OK,"Restore Success"),
 
     LOGIN_SUCCESS(HttpStatus.CREATED, "Login Success"),
     LOGOUT_SUCCESS(HttpStatus.CREATED, "Logout Success"),

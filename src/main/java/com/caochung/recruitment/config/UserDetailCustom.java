@@ -1,6 +1,10 @@
 package com.caochung.recruitment.config;
 
+import com.caochung.recruitment.constant.ErrorCode;
+import com.caochung.recruitment.constant.UserStatusEnum;
 import com.caochung.recruitment.domain.User;
+import com.caochung.recruitment.exception.AppException;
+import com.caochung.recruitment.service.UserService;
 import com.caochung.recruitment.service.impl.UserServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -16,17 +20,20 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class UserDetailCustom implements UserDetailsService {
 
-    private final UserServiceImpl userServiceImpl;
+    private final UserService userService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = this.userServiceImpl.getUserByUsername(username);
+        User user = this.userService.getUserByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException(username);
+        }
+        if (user.getStatus().equals(UserStatusEnum.DISABLED)) {
+            throw new AppException(ErrorCode.USER_DISABLED);
         }
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+                Collections.singletonList(new SimpleGrantedAuthority(user.getRole().getName())));
     }
 }

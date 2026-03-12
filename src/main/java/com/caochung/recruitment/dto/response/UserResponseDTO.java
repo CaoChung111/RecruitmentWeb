@@ -17,6 +17,7 @@ public class UserResponseDTO {
     private int age;
     private String gender;
     private String address;
+    private String status;
     @JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss", timezone = "UTC")
     private Instant createdAt;
     @JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss", timezone = "UTC")

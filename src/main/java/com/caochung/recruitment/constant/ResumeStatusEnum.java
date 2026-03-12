@@ -4,6 +4,8 @@ public enum ResumeStatusEnum {
     PENDING,
     REVIEWING,
     APPROVED,
-    REJECTED;
+    REJECTED,
+    WITHDRAWN,
+    SYSTEM_CANCEL;
     ResumeStatusEnum() {}
 }

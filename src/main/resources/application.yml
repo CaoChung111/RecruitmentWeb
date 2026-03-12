@@ -9,6 +9,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+      dialect: org.hibernate.dialect.MySQLDialect
     show-sql: true
   # config pagination start 1
   data:

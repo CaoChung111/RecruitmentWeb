@@ -5,11 +5,15 @@ import com.caochung.recruitment.dto.response.ResponseData;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.hibernate.annotations.WhereJoinTable;
 
 @Entity
 @Table(name = "resumes")
 @Getter @Setter
+@SQLDelete(sql = "UPDATE resumes SET status = 'SYSTEM_CANCEL' WHERE id = ?")
+//@Where(clause = "status != 'SYSTEM_CANCEL'")
 public class Resume extends Base{
     @Column(name = "email")
     private String email;

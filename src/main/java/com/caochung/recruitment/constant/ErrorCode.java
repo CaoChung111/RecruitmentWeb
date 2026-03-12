@@ -18,6 +18,8 @@ public enum ErrorCode {
     USER_EXISTED("User already existed", HttpStatus.BAD_REQUEST),
     USER_NOT_FOUND("User not found", HttpStatus.NOT_FOUND),
     EMAIL_EXISTED("Email already existed", HttpStatus.BAD_REQUEST),
+    USER_DISABLED("User disabled", HttpStatus.UNAUTHORIZED),
+    USER_ALREADY_ACTIVE("User already active", HttpStatus.BAD_REQUEST),
 
     FILE_ERROR("File error", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_TOO_LARGE("File too long", HttpStatus.PAYLOAD_TOO_LARGE),
@@ -25,20 +27,27 @@ public enum ErrorCode {
 
     COMPANY_EXISTED("Company already existed", HttpStatus.BAD_REQUEST),
     COMPANY_NOT_FOUND("Company not found", HttpStatus.NOT_FOUND),
+    COMPANY_INACTIVE("Company inactive", HttpStatus.BAD_REQUEST),
+    COMPANY_ALREADY_ACTIVE("Company already active", HttpStatus.BAD_REQUEST),
 
     SKILL_EXISTED("Skill already existed", HttpStatus.BAD_REQUEST),
     SKILL_NOT_FOUND("Skill not found", HttpStatus.NOT_FOUND),
+    SKILL_HAS_USED("Skill has been used", HttpStatus.BAD_REQUEST),
 
     JOB_EXISTED("Job already existed", HttpStatus.BAD_REQUEST),
     JOB_NOT_FOUND("Job not found", HttpStatus.NOT_FOUND),
+    JOB_HAS_ACTIVE_RESUMES("Job has resumes", HttpStatus.BAD_REQUEST),
+    JOB_INACTIVE("Job has been inactive", HttpStatus.BAD_REQUEST),
 
     RESUME_NOT_FOUND("Resume not found",  HttpStatus.NOT_FOUND),
 
     PERMISSION_NOT_FOUND("Permission not found",  HttpStatus.NOT_FOUND),
     PERMISSION_EXISTED("Permission already existed",  HttpStatus.BAD_REQUEST),
+    PERMISSION_HAS_USED("Permission has been used", HttpStatus.BAD_REQUEST),
 
     ROLE_EXISTED("Role already existed",  HttpStatus.BAD_REQUEST),
     ROLE_NOT_FOUND("Role not found",  HttpStatus.NOT_FOUND),
+    ROLE_ALREADY_ACTIVE("Role has been active",  HttpStatus.BAD_REQUEST),
 
     SUBSCRIBER_EXISTED("Subscriber already existed",  HttpStatus.BAD_REQUEST),
     SUBSCRIBER_NOT_FOUND("Subscriber not found",  HttpStatus.NOT_FOUND),;

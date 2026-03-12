@@ -16,17 +16,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PermissionServiceImpl implements PermissionService {
     private final PermissionMapper permissionMapper;
     private final PermissionRepository permissionRepository;
     private final RoleRepository roleRepository;
 
     @Override
+    @Transactional
     public PermissionResponseDTO createPermission(PermissionRequestDTO permissionRequestDTO) {
         checkPermission(permissionRequestDTO);
         Permission permission = this.permissionMapper.toPermission(permissionRequestDTO);
@@ -57,6 +60,7 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
+    @Transactional
     public void updatePermission(Long id, PermissionRequestDTO permissionRequestDTO) {
         Permission permission = this.permissionRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.PERMISSION_NOT_FOUND));
@@ -65,16 +69,16 @@ public class PermissionServiceImpl implements PermissionService {
             throw new AppException(ErrorCode.PERMISSION_EXISTED);
         }
         this.permissionMapper.fromUpdate(permissionRequestDTO,permission);
-        this.permissionRepository.save(permission);
     }
 
     @Override
+    @Transactional
     public void deletePermission(Long id) {
         Permission permission = this.permissionRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.PERMISSION_NOT_FOUND));
         List<Role> roles = this.roleRepository.findAllByPermissionsContains(permission);
-        for (Role role : roles) {
-            role.getPermissions().remove(permission);
+        if(!roles.isEmpty()){
+            throw new AppException(ErrorCode.PERMISSION_HAS_USED);
         }
         this.permissionRepository.deleteById(id);
     }

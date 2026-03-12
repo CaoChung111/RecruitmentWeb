@@ -7,6 +7,7 @@ import com.caochung.recruitment.dto.response.PaginationResponseDTO;
 import com.caochung.recruitment.dto.response.RoleResponseDTO;
 import com.caochung.recruitment.exception.AppException;
 import com.caochung.recruitment.repository.RoleRepository;
+import com.caochung.recruitment.repository.UserRepository;
 import com.caochung.recruitment.service.RoleService;
 import com.caochung.recruitment.service.mapper.RoleMapper;
 import lombok.RequiredArgsConstructor;
@@ -14,16 +15,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
     private final RoleMapper roleMapper;
 
     @Override
+    @Transactional
     public RoleResponseDTO createRole(RoleRequestDTO roleRequestDTO) {
         if(roleRepository.existsByName(roleRequestDTO.getName())){
             throw new AppException(ErrorCode.ROLE_EXISTED);
@@ -55,6 +60,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Transactional
     public void updateRole(Long id, RoleRequestDTO roleRequestDTO) {
         Role role = roleRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.ROLE_NOT_FOUND));
@@ -62,13 +68,16 @@ public class RoleServiceImpl implements RoleService {
             throw new AppException(ErrorCode.ROLE_EXISTED);
         }
         this.roleMapper.fromUpdate(roleRequestDTO, role);
-        this.roleRepository.save(role);
     }
 
     @Override
+    @Transactional
     public void deleteRole(Long id) {
-        this.roleRepository.findById(id).orElseThrow(
+        Role role = this.roleRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+        if(userRepository.existsByRole(role)){
+            throw new AppException(ErrorCode.ROLE_ALREADY_ACTIVE);
+        }
         this.roleRepository.deleteById(id);
     }
 }

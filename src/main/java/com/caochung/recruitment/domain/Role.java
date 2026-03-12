@@ -22,7 +22,7 @@ public class Role extends Base{
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "permission_role", joinColumns = @JoinColumn(name = "role_id"),
-    inverseJoinColumns = @JoinColumn(name = "permission_id"))
+    inverseJoinColumns = @JoinColumn(name = "permission_id"), uniqueConstraints = @UniqueConstraint(columnNames = {"role_id", "permission_id"}))
     private Set<Permission> permissions;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "role")

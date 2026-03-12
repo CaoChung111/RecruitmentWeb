@@ -1,8 +1,10 @@
 package com.caochung.recruitment.dto.request;
 
 import com.caochung.recruitment.constant.GenderEnum;
+import com.caochung.recruitment.constant.UserStatusEnum;
 import com.caochung.recruitment.domain.Company;
 import com.caochung.recruitment.util.annotation.Gender;
+import com.caochung.recruitment.util.annotation.UserStatus;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,6 +16,7 @@ import java.io.Serializable;
 import static com.caochung.recruitment.constant.GenderEnum.FEMALE;
 import static com.caochung.recruitment.constant.GenderEnum.MALE;
 import static com.caochung.recruitment.constant.GenderEnum.OTHER;
+import static com.caochung.recruitment.constant.UserStatusEnum.*;
 
 @Getter
 @Setter

@@ -5,6 +5,8 @@ import com.caochung.recruitment.constant.LevelEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.time.Instant;
 import java.util.List;
@@ -12,6 +14,8 @@ import java.util.List;
 @Entity
 @Table(name = "jobs")
 @Getter @Setter
+@SQLDelete(sql = "UPDATE jobs SET active = 'INACTIVE', updated_at = CURRENT_TIMESTAMP WHERE id = ?")
+@Where(clause = "active != 'INACTIVE'")
 public class Job extends Base{
     @Column(name = "name")
     private String name;

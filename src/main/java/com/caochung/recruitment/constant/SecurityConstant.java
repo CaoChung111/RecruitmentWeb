@@ -10,6 +10,8 @@ public final class SecurityConstant {
     public static final String COMPANY_DELETE = "hasAuthority('COMPANY_DELETE')";
     public static final String COMPANY_VIEW_DETAIL = "hasAuthority('COMPANY_VIEW_DETAIL')";
     public static final String COMPANY_VIEW_ALL = "hasAuthority('COMPANY_VIEW_ALL')";
+    public static final String COMPANY_VIEW_INACTIVE = "hasAuthority('COMPANY_VIEW_INACTIVE')";
+    public static final String COMPANY_RESTORE = "hasAuthority('COMPANY_RESTORE')";
 
     // ================= 2. JOBS =================
     public static final String JOB_CREATE = "hasAuthority('JOB_CREATE')";
@@ -54,6 +56,8 @@ public final class SecurityConstant {
     public static final String USER_DELETE = "hasAuthority('USER_DELETE') and @customSecurity.isUserOwner(#id)";
     public static final String USER_VIEW_DETAIL = "hasAuthority('USER_VIEW_DETAIL') and @customSecurity.isUserOwner(#id)";
     public static final String USER_VIEW_ALL = "hasAuthority('USER_VIEW_ALL')";
+    public static final String USER_VIEW_DISABLE = "hasAuthority('USER_VIEW_DISABLE')";
+    public static final String USER_RESTORE = "hasAuthority('USER_RESTORE')";
 
     // ================= 8. SUBSCRIBERS =================
     public static final String SUBSCRIBER_CREATE = "hasAuthority('SUBSCRIBER_CREATE')";

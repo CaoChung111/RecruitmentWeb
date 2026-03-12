@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/recruitment
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # Mail config
+  mail:
+    username: bcc1112005@gmail.com
+    password: kmgtlxwtayxgvzko
+
+#config jwt
+caochung:
+  jwt:
+    base64-secret: o6mTauvaIYPb0FLpjVb3T6HDsUVpZNeLuRI4cYsFUAs15AXqZoQ1NEsGcatFLQVRnTl/J/scJK8Efws8fIFjoA==
+    # expiration 1 day
+    access-token-validity-in-second: 86400
+    refresh-token-validity-in-second: 86400
+
+#cloudinary config
+cloudinary:
+  cloud-name: drzkudoix
+  api-key: 761716841287235
+  api-secret: ZqrNqWiIQSvRbn2db5-nmcH5iJ4
+
+open:
+  api:
+    title: API-service document
+    version: v1.0.0
+    description: API Recruitment Web Document
+    serverUrl: http://localhost:8080
+    serverName: Local Development Server

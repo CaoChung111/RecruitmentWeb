@@ -4,7 +4,8 @@ public enum JobStatusEnum {
     OPEN,
     CLOSED,
     DRAFT,
-    FILLED;
+    FILLED,
+    INACTIVE;
 
     JobStatusEnum() {}
 }
