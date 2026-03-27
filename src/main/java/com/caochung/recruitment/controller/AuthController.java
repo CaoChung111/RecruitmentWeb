@@ -1,14 +1,15 @@
 package com.caochung.recruitment.controller;
 
+import com.caochung.recruitment.config.CustomUserDetails;
 import com.caochung.recruitment.constant.ErrorCode;
 import com.caochung.recruitment.constant.SuccessCode;
 import com.caochung.recruitment.domain.User;
-import com.caochung.recruitment.dto.request.LoginDTO;
-import com.caochung.recruitment.dto.request.RegisterDTO;
+import com.caochung.recruitment.dto.request.*;
 import com.caochung.recruitment.dto.response.ResponseData;
 import com.caochung.recruitment.dto.response.LoginResponseDTO;
 import com.caochung.recruitment.dto.response.UserResponseDTO;
 import com.caochung.recruitment.exception.AppException;
+import com.caochung.recruitment.service.AuthService;
 import com.caochung.recruitment.service.UserService;
 import com.caochung.recruitment.service.mapper.RoleMapper;
 import com.caochung.recruitment.util.SecurityUtil;
@@ -18,24 +19,28 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @Tag(name = "Authentication & Authorization", description = "APIs for user authentication, registration, and token management.")
 public class AuthController {
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final AuthenticationManager authenticationManager;
     private final SecurityUtil securityUtil;
-    private final UserService userServiceImpl;
+    private final UserService userService;
+    private final AuthService authService;
     private final RoleMapper roleMapper;
 
     @Value("${caochung.jwt.refresh-token-validity-in-second}")
@@ -47,25 +52,24 @@ public class AuthController {
         //Nạp input vào Security
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword());
         //Xác thực người dùng
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(token);
-
-        //Tạo token
+        Authentication authentication = authenticationManager.authenticate(token);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        User user = this.userServiceImpl.getUserByUsername(loginDTO.getUsername());
+        //Tạo token
+        String accessToken = this.securityUtil.createAccessToken(authentication);
 
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
         LoginResponseDTO loginResponseDTO = LoginResponseDTO.builder()
                 .userInfo(LoginResponseDTO.UserInfo.builder()
-                        .id(user.getId())
-                        .username(user.getName())
-                        .email(user.getEmail())
-                        .role(roleMapper.toDTO(user.getRole()))
+                        .id(customUserDetails.getId())
+                        .username(customUserDetails.getName())
+                        .email(customUserDetails.getEmail())
+                        .role(roleMapper.toDTO(customUserDetails.getRole()))
                         .build())
                 .build();
-        String accessToken = this.securityUtil.createAccessToken(authentication.getName(), loginResponseDTO);
         loginResponseDTO.setAccessToken(accessToken);
-        String refreshToken = this.securityUtil.createRefreshToken(user.getEmail(), loginResponseDTO);
-        this.userServiceImpl.updateUserToken(refreshToken, user.getEmail());
+        String refreshToken = this.securityUtil.createRefreshToken(authentication);
+        this.userService.updateUserToken(refreshToken, customUserDetails.getEmail());
 
         ResponseCookie responseCookie = ResponseCookie
                 .from("refreshToken", refreshToken)
@@ -83,11 +87,9 @@ public class AuthController {
     @Operation(summary = "User Logout", description = "Logs out the current user by invalidating their refresh token and clearing the refresh token cookie. Requires authentication.")
     @PostMapping("/auth/logout")
     public ResponseEntity<ResponseData<?>> Logout() {
-        String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
-        if(email.isEmpty()){
-            throw new AppException(ErrorCode.INVALID_ACCESS_TOKEN);
-        }
-        this.userServiceImpl.updateUserToken(null, email);
+        String email = SecurityUtil.getCurrentUserLogin()
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_ACCESS_TOKEN));
+        this.userService.updateUserToken(null, email);
 
         ResponseCookie deleteSpringCookie = ResponseCookie
                 .from("refreshToken", null)
@@ -107,7 +109,7 @@ public class AuthController {
     public ResponseEntity<ResponseData<LoginResponseDTO>> getAccount() {
         String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
 
-        User user = this.userServiceImpl.getUserByUsername(email);
+        User user = this.userService.getUserByUsername(email);
         LoginResponseDTO loginResponseDTO = LoginResponseDTO.builder()
                 .userInfo(LoginResponseDTO.UserInfo.builder()
                         .id(user.getId())
@@ -126,15 +128,29 @@ public class AuthController {
         if(refreshToken.equals("defaultRefreshToken")) {
             throw new AppException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
+        // Giải mã JWT cũ để lấy email
         Jwt decodeRefreshToken = this.securityUtil.checkValidRefreshToken(refreshToken);
         String email = decodeRefreshToken.getSubject();
 
-        User user = this.userServiceImpl.getUserByRefreshTokenAndEmail(refreshToken, email);
+        User user = this.userService.getUserByRefreshTokenAndEmail(refreshToken, email);
         if (user == null) {
             throw new AppException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        if(user.getRole()!=null && user.getRole().getPermissions()!=null) {
+            authorities = user.getRole().getPermissions().stream()
+                    .map(permission -> new SimpleGrantedAuthority(permission.getName())).toList();
+        }
+
+        CustomUserDetails customUserDetails = new CustomUserDetails(user.getId(), user.getEmail(), user.getPassword(), user.getName(), user.getRole(), authorities);
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, null, authorities);
+        String accessToken = this.securityUtil.createAccessToken(authentication);
+        String newRefreshToken = this.securityUtil.createRefreshToken(authentication);
+
         LoginResponseDTO loginResponseDTO = LoginResponseDTO.builder()
+                .accessToken(accessToken)
                 .userInfo(LoginResponseDTO.UserInfo.builder()
                         .id(user.getId())
                         .username(user.getName())
@@ -142,10 +158,7 @@ public class AuthController {
                         .role(roleMapper.toDTO(user.getRole()))
                         .build())
                 .build();
-        String accessToken = this.securityUtil.createAccessToken(email, loginResponseDTO);
-        loginResponseDTO.setAccessToken(accessToken);
-        String newRefreshToken = this.securityUtil.createRefreshToken(email, loginResponseDTO);
-        this.userServiceImpl.updateUserToken(refreshToken, email);
+        this.userService.updateUserToken(newRefreshToken, email);
 
         ResponseCookie responseCookie = ResponseCookie
                 .from("refreshToken", newRefreshToken)
@@ -163,8 +176,30 @@ public class AuthController {
     @Operation(summary = "Register New User", description = "Registers a new user account with the provided details. No authentication required.")
     @PostMapping("/auth/register")
     public ResponseData<UserResponseDTO> registerUser(@Valid @RequestBody RegisterDTO registerDTO) {
-        UserResponseDTO userResponseDTO = this.userServiceImpl.register(registerDTO);
+        UserResponseDTO userResponseDTO = this.authService.registerAndSendOtp(registerDTO);
         return ResponseData.success(userResponseDTO
                 , SuccessCode.CREATED_SUCCESS);
     }
+
+    @Operation(summary = "Verify OTP", description = "Verifies the OTP sent to the candidate's email to activate the account.")
+    @PostMapping("/auth/verify-otp")
+    public ResponseData<?> verifyOtp(@RequestBody VerifyOtpDTO verifyOtpDTO) {
+        this.authService.VerifyOtp(verifyOtpDTO);
+        return ResponseData.success(SuccessCode.VERIFICATION_SUCCESS);
+    }
+
+    @Operation(summary = "Forgot Password", description = "Initiates the password reset process. An OTP will be sent to the user's registered email address.")
+    @PostMapping("auth/forgot-password")
+    public ResponseData<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO email) {
+        authService.forgotPassword(email.getEmail());
+        return ResponseData.success("The OTP code has been sent to your email", SuccessCode.CREATED_SUCCESS);
+    }
+
+    @Operation(summary = "Reset Password", description = "Resets the user's password using a valid OTP and the new password provided.")
+    @PutMapping("auth/reset-password")
+    public ResponseData<String> resetPassword(@Valid @RequestBody ResetPasswordRequestDTO resetPasswordRequestDTO) {
+        authService.resetPassword(resetPasswordRequestDTO);
+        return ResponseData.success(SuccessCode.PUT_SUCCESS);
+    }
+
 }

@@ -5,6 +5,7 @@ import com.caochung.recruitment.domain.User;
 import com.caochung.recruitment.dto.request.RegisterDTO;
 import com.caochung.recruitment.dto.request.UserRequestDTO;
 import com.caochung.recruitment.dto.request.UserUpdateDTO;
+import com.caochung.recruitment.dto.request.VerifyOtpDTO;
 import com.caochung.recruitment.dto.response.PaginationResponseDTO;
 import com.caochung.recruitment.dto.response.UserResponseDTO;
 import com.caochung.recruitment.exception.AppException;
@@ -13,13 +14,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 public interface UserService {
     UserResponseDTO createUser(UserRequestDTO userRequestDTO);
-
-    UserResponseDTO register(RegisterDTO registerDTO);
 
     PaginationResponseDTO getAllUsers(Specification<User> specification, Pageable pageable);
 

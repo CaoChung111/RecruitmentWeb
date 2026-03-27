@@ -16,6 +16,9 @@ spring:
     web:
       pageable:
         one-indexed-parameters: true
+    redis:
+      host: localhost
+      post: 6379
   # Multipart config
   servlet:
     multipart:

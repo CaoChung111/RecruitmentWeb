@@ -1,10 +1,13 @@
 package com.caochung.recruitment.util;
 
+import com.caochung.recruitment.config.CustomUserDetails;
 import com.caochung.recruitment.dto.response.LoginResponseDTO;
 import com.caochung.recruitment.dto.response.RoleResponseDTO;
 import com.nimbusds.jose.util.Base64;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,13 +24,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class SecurityUtil {
 
     private final JwtEncoder jwtEncoder;
-
-    public SecurityUtil(JwtEncoder jwtEncoder) {
-        this.jwtEncoder = jwtEncoder;
-    }
 
     public static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS512;
 
@@ -40,19 +40,16 @@ public class SecurityUtil {
     @Value("${caochung.jwt.refresh-token-validity-in-second}")
     private long refreshTokenExpiration;
 
-    public String createAccessToken(String email, LoginResponseDTO loginResponseDTO) {
-        LoginResponseDTO.UserInfo userInfo = loginResponseDTO.getUserInfo();
+    public String createAccessToken(Authentication authentication) {
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        List<String> authorities = new ArrayList<>();
-        if(userInfo!=null && userInfo.getRole()!=null && userInfo.getRole().getPermissions()!=null){
-            authorities = userInfo.getRole().getPermissions().stream()
-                    .map(RoleResponseDTO.PermissionRole::getName).toList();
-        }
+        List<String> authorities = customUserDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).toList();
 
         LoginResponseDTO.UserInsideToken userToken = LoginResponseDTO.UserInsideToken.builder()
-                .id(loginResponseDTO.getUserInfo().getId())
-                .email(loginResponseDTO.getUserInfo().getEmail())
-                .username(loginResponseDTO.getUserInfo().getUsername())
+                .id(customUserDetails.getId())
+                .email(customUserDetails.getEmail())
+                .username(customUserDetails.getName())
                 .build();
 
         Instant now = Instant.now();
@@ -61,7 +58,7 @@ public class SecurityUtil {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
                 .expiresAt(expiration)
-                .subject(email)
+                .subject(customUserDetails.getEmail())
                 .claim("user", userToken)
                 .claim("permission", authorities)
                 .build();
@@ -70,11 +67,13 @@ public class SecurityUtil {
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
     }
 
-    public String createRefreshToken(String email, LoginResponseDTO dto) {
+    public String createRefreshToken(Authentication  authentication) {
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+
         LoginResponseDTO.UserInsideToken userToken = LoginResponseDTO.UserInsideToken.builder()
-                .id(dto.getUserInfo().getId())
-                .email(dto.getUserInfo().getEmail())
-                .username(dto.getUserInfo().getUsername())
+                .id(customUserDetails.getId())
+                .email(customUserDetails.getEmail())
+                .username(customUserDetails.getName())
                 .build();
 
         Instant now = Instant.now();
@@ -83,7 +82,7 @@ public class SecurityUtil {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
                 .expiresAt(expiration)
-                .subject(email)
+                .subject(customUserDetails.getEmail())
                 .claim("user", userToken)
                 .build();
 

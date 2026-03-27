@@ -1,8 +1,10 @@
 package com.caochung.recruitment.repository;
 
+import com.caochung.recruitment.constant.UserStatusEnum;
 import com.caochung.recruitment.domain.Company;
 import com.caochung.recruitment.domain.Role;
 import com.caochung.recruitment.domain.User;
+import jakarta.validation.constraints.Email;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -18,7 +20,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
-    User findByEmail(String email);
+    Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
 
@@ -48,4 +50,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     void restoreUsersByCompanyId(Long companyId);
 
     boolean existsByRole(Role role);
+
+    @Query(value = "SELECT * FROM users WHERE email = ?1", nativeQuery = true)
+    User findByEmailIgnoringSoftDelete(String email);
 }

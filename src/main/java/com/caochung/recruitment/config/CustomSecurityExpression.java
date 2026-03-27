@@ -30,7 +30,7 @@ public class CustomSecurityExpression {
         String email = SecurityUtil.getCurrentUserLogin().orElse("");
         if (email.isEmpty()) return null;
 
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email).orElse(null);
         if (user == null || !UserStatusEnum.ACTIVE.equals(user.getStatus())) {
             return null;
         }

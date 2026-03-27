@@ -2,9 +2,7 @@ package com.caochung.recruitment.service.impl;
 
 import com.caochung.recruitment.constant.ErrorCode;
 import com.caochung.recruitment.constant.UserStatusEnum;
-import com.caochung.recruitment.domain.Role;
 import com.caochung.recruitment.domain.User;
-import com.caochung.recruitment.dto.request.RegisterDTO;
 import com.caochung.recruitment.dto.request.UserRequestDTO;
 import com.caochung.recruitment.dto.request.UserUpdateDTO;
 import com.caochung.recruitment.dto.response.PaginationResponseDTO;
@@ -17,6 +15,7 @@ import com.caochung.recruitment.service.UserService;
 import com.caochung.recruitment.service.mapper.UserMapper;
 import com.caochung.recruitment.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -26,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,13 +32,16 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final RoleRepository roleRepository;
     private final ResumeRepository resumeRepository;
     private final PasswordEncoder passwordEncoder;
 
-
+    /**
+     * create user by admin
+     * @param userRequestDTO
+     * @return
+     */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
         if(userRepository.existsByEmail(userRequestDTO.getEmail())){
             throw new AppException(ErrorCode.EMAIL_EXISTED);
@@ -48,24 +49,6 @@ public class UserServiceImpl implements UserService {
         userRequestDTO.setPassword(passwordEncoder.encode(userRequestDTO.getPassword()));
         User user = userMapper.toEntity(userRequestDTO);
         user.setStatus(UserStatusEnum.ACTIVE);
-        User saveUser = userRepository.save(user);
-        return userMapper.toDto(saveUser);
-    }
-
-    @Override
-    @Transactional
-    public UserResponseDTO register(RegisterDTO registerDTO) {
-        if(userRepository.existsByEmail(registerDTO.getEmail())){
-            throw new AppException(ErrorCode.EMAIL_EXISTED);
-        }
-        registerDTO.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
-
-        User user = userMapper.toEntity(registerDTO);
-        Role defaultRole = Optional.ofNullable(this.roleRepository.findByName("CANDIDATE")).orElseThrow(
-                () -> new AppException(ErrorCode.ROLE_NOT_FOUND));
-        user.setRole(defaultRole);
-        user.setStatus(UserStatusEnum.ACTIVE);
-
         User saveUser = userRepository.save(user);
         return userMapper.toDto(saveUser);
     }
@@ -85,6 +68,11 @@ public class UserServiceImpl implements UserService {
         return new PaginationResponseDTO(meta, userResponseDTOs);
     }
 
+    /**
+     * Update info user
+     * @param id
+     * @param userUpdateDTO
+     */
     @Override
     @Transactional
     public void updateUser(Long id, UserUpdateDTO userUpdateDTO) {
@@ -93,6 +81,10 @@ public class UserServiceImpl implements UserService {
         userMapper.fromUpdate(userUpdateDTO, user);
     }
 
+    /**
+     * Delete user by id
+     * @param id
+     */
     @Override
     @Transactional
     public void deleteUser(Long id) {
@@ -105,7 +97,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByUsername(String username) {
-        return this.userRepository.findByEmail(username);
+        return this.userRepository.findByEmail(username).orElseThrow(
+                ()-> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
     @Override
@@ -115,13 +108,15 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(user);
     }
 
+    /**
+     * update refresh token
+     * @param token
+     * @param email
+     */
     @Override
     @Transactional
     public void updateUserToken(String token, String email) {
-        User user = this.userRepository.findByEmail(email);
-        if(user != null){
-            user.setRefreshToken(token);
-        }
+        this.userRepository.findByEmail(email).ifPresent(user -> user.setRefreshToken(token));
     }
 
     @Override
@@ -129,6 +124,11 @@ public class UserServiceImpl implements UserService {
         return this.userRepository.findByRefreshTokenAndEmail(refreshToken, email);
     }
 
+    /**
+     * Get all user has been soft deleted
+     * @param pageable
+     * @return
+     */
     @Override
     public PaginationResponseDTO getAllDisableUser(Pageable pageable){
         Page<User> pageUsers = userRepository.findAllDisableUsers(pageable);
@@ -143,6 +143,10 @@ public class UserServiceImpl implements UserService {
         return new PaginationResponseDTO(meta, userResponseDTOs);
     }
 
+    /**
+     * Restore user
+     * @param id
+     */
     @Override
     @Transactional
     public void restoreUserById(Long id){

@@ -33,7 +33,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         ResponseError responseError = new ResponseError();
         responseError.setTimestamp(new Date());
         responseError.setStatus(HttpStatus.UNAUTHORIZED.value());
-        responseError.setPath(request.getContextPath() + "/login");
+        responseError.setPath(request.getRequestURI());
         String errorMessage = Optional.ofNullable(authException.getCause()).map(Throwable::getMessage).orElse(authException.getMessage());
         responseError.setError(errorMessage);
         responseError.setMessage("Token không hợp lệ (hết hạn, không đúng định dạng)");

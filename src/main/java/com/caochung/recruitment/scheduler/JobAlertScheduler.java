@@ -12,14 +12,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.beans.Transient;
 import java.util.Collections;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
-public class jobAlertScheduler {
+@Slf4j(topic = "SCHEDULER-JOB")
+public class JobAlertScheduler {
     private final JobRepository jobRepository;
     private final EmailService emailService;
     private final SubscriberRepository subscriberRepository;
@@ -27,7 +26,7 @@ public class jobAlertScheduler {
     @Scheduled(cron = "0 0 8 * * ?")
     @Transactional(readOnly = true)
     public void scheduledJobAlertEmail() {
-        log.info("Scheduling job alert email");
+        log.info("SCHEDULER JOB ALERT EMAIL");
         List<Job> jobs = jobRepository.findAllByActive(JobStatusEnum.OPEN);
         List<Subscriber> subscribers = subscriberRepository.findAll();
 
@@ -38,7 +37,7 @@ public class jobAlertScheduler {
                 emailService.sendJobAlertEmail(subscriber.getEmail(), subscriber.getName(), matchedJobs);
             }
         }
-        log.info(">>> Kết thúc quét Job. Các email đang được gửi ngầm (Async).");
+        log.info("SCHEDULER JOB ALERT EMAIL FINISHED");
     }
 
     private boolean isSkillMatched(Subscriber subscriber, Job job) {

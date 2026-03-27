@@ -14,6 +14,11 @@ public enum ErrorCode {
     ACCESS_DENIED("Access denied", HttpStatus.FORBIDDEN),
 
     VALIDATION_ERROR("Validation failed", HttpStatus.BAD_REQUEST),
+    VERIFICATION_TIMEOUT("Verification timed out", HttpStatus.UNAUTHORIZED),
+    VERIFICATION_INCORRECT("Verification incorrect", HttpStatus.BAD_REQUEST),
+    WAITING_60_SECONDS_TO_SEND_NEW_VERIFICATION_CODE("Waiting 60 Seconds to send new verification code", HttpStatus.BAD_REQUEST),
+
+    INVALID_OTP_CODE("Invalid OTP code", HttpStatus.BAD_REQUEST),
 
     USER_EXISTED("User already existed", HttpStatus.BAD_REQUEST),
     USER_NOT_FOUND("User not found", HttpStatus.NOT_FOUND),

@@ -49,7 +49,7 @@ public class JobServiceImpl implements JobService {
         if (isDashBoard) {
             String email = SecurityUtil.getCurrentUserLogin().isPresent()
                     ? SecurityUtil.getCurrentUserLogin().get() : null;
-            User user = this.userRepository.findByEmail(email);
+            User user = this.userRepository.findByEmail(email).orElse(null);
             if (user.getCompany() != null) {
                 Specification<Job> spec = (root, query, criteriaBuilder) ->
                         criteriaBuilder.equal(root.get("company"), user.getCompany());

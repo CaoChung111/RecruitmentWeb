@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Verification</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 0;
+            color: #333333;
+        }
+        .email-wrapper {
+            width: 100%;
+            background-color: #f4f7fa;
+            padding: 40px 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        .email-header {
+            background-color: #0056b3; /* Màu chủ đạo của bạn, có thể đổi */
+            padding: 24px;
+            text-align: center;
+            color: #ffffff;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+        .email-body {
+            padding: 32px;
+            line-height: 1.6;
+        }
+        .email-body p {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+        }
+        .otp-box {
+            text-align: center;
+            margin: 32px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px dashed #ced4da;
+            border-radius: 8px;
+        }
+        .otp-code {
+            font-size: 36px;
+            font-weight: bold;
+            color: #0056b3;
+            letter-spacing: 6px;
+            margin: 0;
+        }
+        .warning-text {
+            font-size: 14px;
+            color: #dc3545;
+            text-align: center;
+            margin-top: 8px;
+        }
+        .email-footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #6c757d;
+            border-top: 1px solid #eeeeee;
+        }
+        .email-footer p {
+            margin: 4px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="email-wrapper">
+    <div class="email-container">
+        <div class="email-header">
+            <h1>Recruitment Platform</h1>
+        </div>
+
+        <div class="email-body">
+            <p>Hello,</p>
+            <p>Thank you for registering an account on our platform. To complete your registration and secure your account, please use the One-Time Password (OTP) below:</p>
+
+            <div class="otp-box">
+                <p style="margin: 0; color: #6c757d; font-size: 14px; text-transform: uppercase;">Your Verification Code</p>
+                <h2 class="otp-code" th:text="${otpCode}">123456</h2>
+            </div>
+
+            <p class="warning-text">⚠️ This code will expire in <strong>5 minutes</strong>.</p>
+            <p>Please do not share this code with anyone, including our support team, to ensure the safety of your account.</p>
+            <p>Best regards,<br><strong>The Development Team</strong></p>
+        </div>
+
+        <div class="email-footer">
+            <p>This is an automated email. Please do not reply.</p>
+            <p>&copy; 2026 Recruitment Platform. All rights reserved.</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

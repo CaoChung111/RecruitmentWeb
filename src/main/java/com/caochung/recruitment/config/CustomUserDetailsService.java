@@ -5,20 +5,21 @@ import com.caochung.recruitment.constant.UserStatusEnum;
 import com.caochung.recruitment.domain.User;
 import com.caochung.recruitment.exception.AppException;
 import com.caochung.recruitment.service.UserService;
-import com.caochung.recruitment.service.impl.UserServiceImpl;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 @Component("userDetailService")
 @RequiredArgsConstructor
-public class UserDetailCustom implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserService userService;
 
@@ -31,9 +32,12 @@ public class UserDetailCustom implements UserDetailsService {
         if (user.getStatus().equals(UserStatusEnum.DISABLED)) {
             throw new AppException(ErrorCode.USER_DISABLED);
         }
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority(user.getRole().getName())));
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        if(user.getRole() != null && user.getRole().getPermissions() != null) {
+            authorities = user.getRole().getPermissions().stream()
+                    .map(permission -> new SimpleGrantedAuthority(permission.getName())).toList();
+        }
+
+        return new CustomUserDetails(user.getId(), user.getEmail(), user.getPassword(), user.getName(), user.getRole(), authorities);
     }
 }
