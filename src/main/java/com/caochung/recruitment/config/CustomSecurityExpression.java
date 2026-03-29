@@ -1,9 +1,6 @@
 package com.caochung.recruitment.config;
 
 import com.caochung.recruitment.constant.UserStatusEnum;
-import com.caochung.recruitment.domain.Company;
-import com.caochung.recruitment.domain.Job;
-import com.caochung.recruitment.domain.Resume;
 import com.caochung.recruitment.domain.User;
 import com.caochung.recruitment.repository.CompanyRepository;
 import com.caochung.recruitment.repository.JobRepository;
@@ -11,10 +8,8 @@ import com.caochung.recruitment.repository.ResumeRepository;
 import com.caochung.recruitment.repository.UserRepository;
 import com.caochung.recruitment.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component("customSecurity")
 @RequiredArgsConstructor
@@ -25,74 +20,65 @@ public class CustomSecurityExpression {
     private final ResumeRepository resumeRepository;
     private final CompanyRepository companyRepository;
 
-    // Lấy User hợp lệ
+    // Lấy User hợp lệ (Tạm giữ nguyên, nhưng đã gom logic check cho gọn)
     private User getValidCurrentUser() {
-        String email = SecurityUtil.getCurrentUserLogin().orElse("");
-        if (email.isEmpty()) return null;
-
-        User user = userRepository.findByEmail(email).orElse(null);
-        if (user == null || !UserStatusEnum.ACTIVE.equals(user.getStatus())) {
-            return null;
-        }
-        return user;
+        return SecurityUtil.getCurrentUserLogin()
+                .flatMap(userRepository::findByEmail)
+                .filter(user -> UserStatusEnum.ACTIVE.equals(user.getStatus()))
+                .orElse(null);
     }
 
-    // Check quyền User
+    private boolean isSuperAdmin(User user) {
+        return user.getRole().getName().equals("SUPER_ADMIN");
+    }
+
+    // 1. Check quyền User
     public boolean isUserOwner(Long userId) {
         User currentUser = getValidCurrentUser();
         if (currentUser == null) return false;
 
-        if (currentUser.getRole().getName().equals("SUPER_ADMIN")) return true;
-
-        return currentUser.getId().equals(userId);
+        return isSuperAdmin(currentUser) || currentUser.getId().equals(userId);
     }
 
-    // Check quyền sở hữu Job
+    // 2. Check quyền sở hữu Job (HR check Job của công ty mình)
     public boolean isJobOwner(Long jobId) {
         User currentUser = getValidCurrentUser();
         if (currentUser == null) return false;
-        if (currentUser.getRole().getName().equals("SUPER_ADMIN")) return true;
-
-        Optional<Job> job = jobRepository.findById(jobId);
-        if (job.isEmpty()) return false;
+        if (isSuperAdmin(currentUser)) return true;
 
         if (currentUser.getCompany() == null) return false;
-        return job.get().getCompany().getId().equals(currentUser.getCompany().getId());
+
+        // Tối ưu: Dùng exists (Chỉ SELECT 1 record) thay vì load cả entity Job
+        return jobRepository.existsByIdAndCompany_Id(jobId, currentUser.getCompany().getId());
     }
 
-    // Check quyền sở hữu Resume (Ứng viên xem/rút CV)
+    // 3. Check quyền sở hữu Resume (Ứng viên thao tác với CV của mình)
     public boolean isResumeOwner(Long resumeId) {
         User currentUser = getValidCurrentUser();
         if (currentUser == null) return false;
-        if (currentUser.getRole().getName().equals("SUPER_ADMIN")) return true;
+        if (isSuperAdmin(currentUser)) return true;
 
-        Optional<Resume> resume = resumeRepository.findById(resumeId);
-        if (resume.isEmpty()) return false;
-
-        return resume.get().getUser().getId().equals(currentUser.getId());
+        // Tối ưu: Dùng exists
+        return resumeRepository.existsByIdAndUser_Id(resumeId, currentUser.getId());
     }
 
-    // Check quyền HR với Resume
+    // 4. Check quyền HR với Resume (HR chỉ được xem CV nộp vào công ty mình)
     public boolean isResumeInRecruiterCompany(Long resumeId) {
         User currentUser = getValidCurrentUser();
         if (currentUser == null) return false;
-        if (currentUser.getRole().getName().equals("SUPER_ADMIN")) return true;
+        if (isSuperAdmin(currentUser)) return true;
         if (currentUser.getCompany() == null) return false;
 
-        Optional<Resume> resume = resumeRepository.findById(resumeId);
-        if (resume.isEmpty()) return false;
-
-        Company resumeCompany = resume.get().getJob().getCompany();
-        return resumeCompany != null && resumeCompany.getId().equals(currentUser.getCompany().getId());
+        // Tối ưu đỉnh cao: Xuyên qua 2 bảng (Resume -> Job -> Company) chỉ bằng 1 hàm exists
+        return resumeRepository.existsByIdAndJob_Company_Id(resumeId, currentUser.getCompany().getId());
     }
 
-    // Check quyền sở hữu Company
+    // 5. Check quyền sở hữu Company
     public boolean isCompanyOwner(Long companyId) {
         User currentUser = getValidCurrentUser();
         if (currentUser == null) return false;
-        if (currentUser.getRole().getName().equals("SUPER_ADMIN")) return true;
+        if (isSuperAdmin(currentUser)) return true;
 
-        if (currentUser.getCompany() == null) return false;
-        return currentUser.getCompany().getId().equals(companyId);
+        return currentUser.getCompany() != null && currentUser.getCompany().getId().equals(companyId);
     }
 }

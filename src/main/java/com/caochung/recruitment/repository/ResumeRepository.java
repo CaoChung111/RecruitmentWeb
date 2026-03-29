@@ -23,4 +23,8 @@ public interface ResumeRepository extends JpaRepository<Resume,Long>, JpaSpecifi
     @Modifying
     @Query("UPDATE Resume r SET r.status = 'WITHDRAWN', r.updatedAt = :now, r.updatedBy = :updatedBy WHERE r.user.id = :userId")
     void withdrawnResumeByUserId(Instant now, String updatedBy, Long userId);
+
+    boolean existsByIdAndJob_Company_Id(Long resumeId, Long id);
+
+    boolean existsByIdAndUser_Id(Long resumeId, Long id);
 }

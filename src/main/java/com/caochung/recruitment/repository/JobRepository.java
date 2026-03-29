@@ -27,4 +27,6 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     @Modifying
     @Query(value = "UPDATE jobs SET active = 'CLOSED', updated_at = CURRENT_TIMESTAMP WHERE company_id = :companyId", nativeQuery = true)
     void restoreJobsByCompanyId(Long companyId);
+
+    boolean existsByIdAndCompany_Id(Long jobId, Long id);
 }

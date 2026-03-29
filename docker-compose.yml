@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  mysqldb:
+    image: mysql:8.0
+    container_name: recruitment_mysql
+    environment:
+      MYSQL_DATABASE: recruitment
+      MYSQL_ROOT_PASSWORD: 123456
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:alpine
+    container_name: recruitment_redis
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: .
+    container_name: recruitment_backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysqldb
+      - redis
+    env_file:
+      - .env
+
+volumes:
+  mysql_data:
