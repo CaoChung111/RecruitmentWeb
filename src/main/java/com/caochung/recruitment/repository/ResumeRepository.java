@@ -16,6 +16,8 @@ import java.util.List;
 public interface ResumeRepository extends JpaRepository<Resume,Long>, JpaSpecificationExecutor<Resume> {
     boolean existsByJob_IdAndStatusIn(Long id, List<ResumeStatusEnum> statusEnums);
 
+    boolean existsByJob_IdAndEmail(Long id,  String email);
+
     @Modifying
     @Query("UPDATE Resume r SET r.status = 'SYSTEM_CANCEL', r.updatedAt = :now, r.updatedBy = :updatedBy WHERE r.job.company.id = :companyId")
     void inactivateResumeByCompanyId(Instant now, String updatedBy, Long companyId);

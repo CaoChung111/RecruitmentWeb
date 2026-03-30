@@ -1,6 +1,10 @@
 package com.caochung.recruitment.service;
 
-public interface OtpService {
+import org.springframework.data.redis.core.ZSetOperations;
+
+import java.util.Set;
+
+public interface RedisService {
     void savePasswordOtp(String email, String otp);
     String getPasswordOtp(String email);
     void deletePasswordOtp(String email);
@@ -14,4 +18,13 @@ public interface OtpService {
     String getRegisterData(String email);
 
     void clearRegistrationData(String email);
+
+    void createBacklistToken(String token, long expiration);
+
+    boolean isExpireToken(String token);
+
+    void countViewJob(Long jobId);
+
+    Set<String> getJobTrendings();
+
 }

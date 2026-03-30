@@ -10,12 +10,14 @@ import com.caochung.recruitment.dto.response.LoginResponseDTO;
 import com.caochung.recruitment.dto.response.UserResponseDTO;
 import com.caochung.recruitment.exception.AppException;
 import com.caochung.recruitment.service.AuthService;
+import com.caochung.recruitment.service.RedisService;
 import com.caochung.recruitment.service.UserService;
 import com.caochung.recruitment.service.mapper.RoleMapper;
 import com.caochung.recruitment.util.SecurityUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +31,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -42,7 +46,10 @@ public class AuthController {
     private final UserService userService;
     private final AuthService authService;
     private final RoleMapper roleMapper;
+    private final RedisService redisService;
 
+    @Value("${caochung.jwt.access-token-validity-in-second}")
+    private long accessTokenExpiration;
     @Value("${caochung.jwt.refresh-token-validity-in-second}")
     private long refreshTokenExpiration;
 
@@ -90,6 +97,9 @@ public class AuthController {
         String email = SecurityUtil.getCurrentUserLogin()
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_ACCESS_TOKEN));
         this.userService.updateUserToken(null, email);
+
+        Optional<String> currentUserJWT = SecurityUtil.getCurrentUserJWT();
+        currentUserJWT.ifPresent(s -> redisService.createBacklistToken(currentUserJWT.get(), accessTokenExpiration));
 
         ResponseCookie deleteSpringCookie = ResponseCookie
                 .from("refreshToken", null)

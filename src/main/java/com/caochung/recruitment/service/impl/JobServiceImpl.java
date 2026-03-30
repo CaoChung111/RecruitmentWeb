@@ -13,10 +13,13 @@ import com.caochung.recruitment.repository.JobRepository;
 import com.caochung.recruitment.repository.ResumeRepository;
 import com.caochung.recruitment.repository.UserRepository;
 import com.caochung.recruitment.service.JobService;
+import com.caochung.recruitment.service.RedisService;
 import com.caochung.recruitment.service.mapper.JobMapper;
 import com.caochung.recruitment.util.SecurityUtil;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -68,6 +71,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    @Cacheable(value = "job_detail", key = "#id")
     public JobResponseDTO getJobById(Long id) {
         Job job = this.jobRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.JOB_NOT_FOUND));
         return this.jobMapper.toDto(job);
@@ -75,6 +79,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "job_detail", key = "#id")
     public void updateJob(Long id, JobRequestDTO jobRequestDTO) {
         Job job = this.jobRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.JOB_NOT_FOUND));
         if(!job.getName().equals(jobRequestDTO.getName()) && this.jobRepository.existsByName(jobRequestDTO.getName())){
@@ -85,6 +90,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "job_detail", key = "#id")
     public void deleteJob(Long id) {
         Job job = this.jobRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.JOB_NOT_FOUND));
         if(this.resumeRepository.existsByJob_IdAndStatusIn(id, List.of(ResumeStatusEnum.PENDING, ResumeStatusEnum.REVIEWING))){

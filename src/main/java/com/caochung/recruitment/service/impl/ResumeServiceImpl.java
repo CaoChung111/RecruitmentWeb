@@ -57,6 +57,9 @@ public class ResumeServiceImpl implements ResumeService {
         if (job.getCompany().getStatus().equals(CompanyStatusEnum.INACTIVE)) {
             throw new AppException(ErrorCode.COMPANY_INACTIVE);
         }
+        if(resumeRepository.existsByJob_IdAndEmail(resumeRequestDTO.getJobId(), resumeRequestDTO.getEmail())){
+            throw new AppException(ErrorCode.ALREADY_APPLIED);
+        }
         Resume resume = this.resumeMapper.toResume(resumeRequestDTO);
         return resumeMapper.toDTO(this.resumeRepository.save(resume));
     }

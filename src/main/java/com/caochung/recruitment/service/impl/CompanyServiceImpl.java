@@ -15,6 +15,8 @@ import com.caochung.recruitment.exception.AppException;
 import com.caochung.recruitment.constant.ErrorCode;
 import com.caochung.recruitment.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -63,6 +65,7 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
+    @Cacheable(value = "company_detail", key = "#id")
     public CompanyResponseDTO getCompanyById(Long id){
         Company company = this.companyRepository.findById(id)
                 .orElseThrow(() ->  new AppException(ErrorCode.COMPANY_NOT_FOUND));
@@ -71,6 +74,7 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "company_detail", key = "#id")
     public void updateCompany(Long id, CompanyRequestDTO requestDTO) {
         Company company = this.companyRepository.findById(id)
                 .orElseThrow(() ->  new AppException(ErrorCode.COMPANY_NOT_FOUND));
@@ -83,6 +87,7 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "company_detail", key = "#id")
     public void deleteCompany(Long id){
         Company company = companyRepository.findById(id)
                 .orElseThrow(() ->  new AppException(ErrorCode.COMPANY_NOT_FOUND));

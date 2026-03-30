@@ -1,10 +1,15 @@
 package com.caochung.recruitment.config;
 
+import com.caochung.recruitment.service.RedisService;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.util.Base64;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -15,10 +20,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
@@ -33,7 +35,10 @@ import static com.caochung.recruitment.util.SecurityUtil.JWT_ALGORITHM;
 
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)
+@Slf4j
+@RequiredArgsConstructor
 public class SecurityConfiguration {
+    private final RedisService redisService;
     @Value("${caochung.jwt.base64-secret}")
     private String jwtKey;
 
@@ -67,7 +72,8 @@ public class SecurityConfiguration {
                                 .requestMatchers(HttpMethod.GET, "/api/v1/skills", "/api/v1/skills/**").permitAll()
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                        .authenticationEntryPoint(customAuthenticationEntryPoint))
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
 //                .exceptionHandling( exceptions -> exceptions
 //                        .authenticationEntryPoint(customAuthenticationEntryPoint)
 //                        .accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
@@ -97,10 +103,14 @@ public class SecurityConfiguration {
         NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(getSecretKey())
                 .macAlgorithm(JWT_ALGORITHM).build();
         return token -> {
+            if(redisService.isExpireToken(token)) {
+                log.info("Token expired");
+                throw new JwtException("Token has been revoked");
+            }
             try {
                 return jwtDecoder.decode(token);
             } catch (Exception e) {
-                System.out.println(">>> JWT error: " + e.getMessage());
+                log.warn(">>> JWT Validation error: {}", e.getMessage());
                 throw e;
             }
         };

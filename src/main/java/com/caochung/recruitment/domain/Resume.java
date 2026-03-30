@@ -10,7 +10,7 @@ import org.hibernate.annotations.Where;
 import org.hibernate.annotations.WhereJoinTable;
 
 @Entity
-@Table(name = "resumes")
+@Table(name = "resumes", uniqueConstraints = @UniqueConstraint(columnNames = {"email", "job_id"}))
 @Getter @Setter
 @SQLDelete(sql = "UPDATE resumes SET status = 'SYSTEM_CANCEL' WHERE id = ?")
 //@Where(clause = "status != 'SYSTEM_CANCEL'")

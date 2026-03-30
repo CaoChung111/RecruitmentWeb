@@ -13,7 +13,7 @@ import com.caochung.recruitment.exception.AppException;
 import com.caochung.recruitment.repository.RoleRepository;
 import com.caochung.recruitment.repository.UserRepository;
 import com.caochung.recruitment.service.AuthService;
-import com.caochung.recruitment.service.OtpService;
+import com.caochung.recruitment.service.RedisService;
 import com.caochung.recruitment.service.mapper.UserMapper;
 import com.caochung.recruitment.util.OtpGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,7 +33,7 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
-    private final OtpService otpService;
+    private final RedisService redisService;
     private final ApplicationEventPublisher publisher;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper  userMapper;
@@ -58,14 +58,14 @@ public class AuthServiceImpl implements AuthService {
             }
         }
         // Avoid spam otpCode
-        if(otpService.isSpamming(registerDTO.getEmail())){
+        if(redisService.isSpamming(registerDTO.getEmail())){
             throw new AppException(ErrorCode.WAITING_60_SECONDS_TO_SEND_NEW_VERIFICATION_CODE);
         }
 
         String otp = OtpGenerator.generateOtp();
         try{
             String userJson = mapper.writeValueAsString(registerDTO);
-            otpService.saveRegisterData(registerDTO.getEmail(), otp, userJson);
+            redisService.saveRegisterData(registerDTO.getEmail(), otp, userJson);
         } catch (JsonProcessingException e) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
@@ -86,11 +86,11 @@ public class AuthServiceImpl implements AuthService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void VerifyOtp(VerifyOtpDTO verifyOtpDTO){
-        String userJson = otpService.getRegisterData(verifyOtpDTO.getEmail());
+        String userJson = redisService.getRegisterData(verifyOtpDTO.getEmail());
         if(userJson == null){
             throw new AppException(ErrorCode.VERIFICATION_TIMEOUT);
         }
-        String otp = otpService.getRegisterOtp(verifyOtpDTO.getEmail());
+        String otp = redisService.getRegisterOtp(verifyOtpDTO.getEmail());
         if(otp == null || !otp.equals(verifyOtpDTO.getOtp())){
             throw new AppException(ErrorCode.VERIFICATION_INCORRECT);
         }
@@ -106,7 +106,7 @@ public class AuthServiceImpl implements AuthService {
         } catch (JsonProcessingException e) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
-        otpService.clearRegistrationData(verifyOtpDTO.getEmail());
+        redisService.clearRegistrationData(verifyOtpDTO.getEmail());
     }
 
     /**
@@ -119,7 +119,7 @@ public class AuthServiceImpl implements AuthService {
         if (user != null) {
             String otp = OtpGenerator.generateOtp();
 
-            this.otpService.savePasswordOtp(user.getEmail(), otp);
+            this.redisService.savePasswordOtp(user.getEmail(), otp);
             UserRegisterEvent event = UserRegisterEvent.builder()
                     .email(user.getEmail())
                     .otpToken(otp)
@@ -135,7 +135,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void resetPassword(ResetPasswordRequestDTO resetPasswordRequestDTO) {
-        String otpRedis = otpService.getPasswordOtp(resetPasswordRequestDTO.getEmail());
+        String otpRedis = redisService.getPasswordOtp(resetPasswordRequestDTO.getEmail());
         if(otpRedis == null || !otpRedis.equals(resetPasswordRequestDTO.getOtp())) {
             throw new AppException(ErrorCode.INVALID_OTP_CODE);
         }
@@ -145,6 +145,6 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(this.passwordEncoder.encode(resetPasswordRequestDTO.getNewPassword()));
         user.setRefreshToken(null);
         userRepository.save(user);
-        otpService.deletePasswordOtp(resetPasswordRequestDTO.getEmail());
+        redisService.deletePasswordOtp(resetPasswordRequestDTO.getEmail());
     }
 }

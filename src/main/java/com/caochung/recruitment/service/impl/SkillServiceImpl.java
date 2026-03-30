@@ -14,6 +14,8 @@ import com.caochung.recruitment.repository.SubscriberRepository;
 import com.caochung.recruitment.service.SkillService;
 import com.caochung.recruitment.service.mapper.SkillMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -56,6 +58,7 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
+    @Cacheable(value = "skill_detail", key = "#id")
     public SkillResponseDTO getSkillById(Long id) {
         Skill skill = this.skillRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SKILL_NOT_FOUND));
         return skillMapper.toDto(skill);
@@ -63,6 +66,7 @@ public class SkillServiceImpl implements SkillService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "skill_detail", key = "#id")
     public void updateSkill(Long id, SkillRequestDTO skillRequestDTO) {
         Skill skill = this.skillRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.SKILL_NOT_FOUND));
@@ -74,6 +78,7 @@ public class SkillServiceImpl implements SkillService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "skill_detail", key = "#id")
     public void deleteSkill(Long id) {
         Skill skill = this.skillRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.SKILL_NOT_FOUND));

@@ -8,6 +8,7 @@ import com.caochung.recruitment.dto.response.JobResponseDTO;
 import com.caochung.recruitment.dto.response.PaginationResponseDTO;
 import com.caochung.recruitment.dto.response.ResponseData;
 import com.caochung.recruitment.service.JobService;
+import com.caochung.recruitment.service.RedisService;
 import com.turkraft.springfilter.boot.Filter;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,12 +19,18 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @Tag(name = "Job Management", description = "APIs for managing job postings and listings.")
 public class JobController {
     private final JobService jobService;
+    private final RedisService redisService;
 
     @Operation(summary = "Get all jobs", description = "Retrieves a paginated list of all available job postings, with optional filtering. Accessible to all authenticated users.")
     @GetMapping("jobs")
@@ -44,6 +51,7 @@ public class JobController {
     @Operation(summary = "Get job by ID", description = "Fetches detailed information for a specific job posting using its unique identifier. Accessible to all authenticated users.")
     @GetMapping("/jobs/{id}")
     public ResponseData<JobResponseDTO> getJobById(@PathVariable Long id) {
+        redisService.countViewJob(id);
         return ResponseData.success(this.jobService.getJobById(id), SuccessCode.GET_SUCCESS);
     }
 
@@ -68,5 +76,29 @@ public class JobController {
     public ResponseData<?> deleteJob(@PathVariable Long id) {
         this.jobService.deleteJob(id);
         return ResponseData.success(SuccessCode.DELETE_SUCCESS);
+    }
+
+    @Operation(summary = "Get Top 10 Trending Jobs")
+    @GetMapping("/jobs/trending")
+    public ResponseData<List<JobResponseDTO>> getTrendingJobs() {
+        Set<String> topJobIds = redisService.getJobTrendings();
+        if (topJobIds == null || topJobIds.isEmpty()) {
+            return ResponseData.success(new ArrayList<>(), SuccessCode.GET_SUCCESS);
+        }
+
+        List<Long> ids = topJobIds.stream().map(Long::valueOf).toList();
+
+        List<JobResponseDTO> trendingJobs = new ArrayList<>();
+
+        for (Long id : ids) {
+            try {
+                JobResponseDTO job = jobService.getJobById(id);
+                trendingJobs.add(job);
+            } catch (Exception e) {
+                System.out.println("Skip Trending Job ID " + id);
+            }
+        }
+
+        return ResponseData.success(trendingJobs, SuccessCode.GET_SUCCESS);
     }
 }
