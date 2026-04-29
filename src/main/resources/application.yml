@@ -22,8 +22,8 @@ spring:
   # Multipart config
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: 5MB
+      max-request-size: 5MB
 
   # Mail config
   mail:
@@ -42,9 +42,10 @@ spring:
 caochung:
   jwt:
     base64-secret: ${JWT_SECRET}
-    # expiration 6h
-    access-token-validity-in-second: 21600
-    refresh-token-validity-in-second: 86400
+    # expiration 1h
+    access-token-validity-in-second: 3600
+    # expiration 7day
+    refresh-token-validity-in-second: 604800
 
 #cloudinary config
 cloudinary:
