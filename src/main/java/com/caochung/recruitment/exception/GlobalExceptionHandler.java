@@ -87,6 +87,17 @@ public class GlobalExceptionHandler{
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseError);
     }
 
+//    @ExceptionHandler(IllegalArgumentException.class)
+//    public ResponseEntity<ResponseError> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request){
+//        ResponseError responseError = new ResponseError();
+//        responseError.setStatus(HttpStatus.BAD_REQUEST.value());
+//        responseError.setTimestamp(new Date());
+//        responseError.setPath(request.getDescription(false).replace("uri=", ""));
+//        responseError.setError(HttpStatus.BAD_REQUEST.getReasonPhrase());
+//        responseError.setMessage(ex.getMessage());
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseError);
+//    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseError> handleUnwantedException(Exception ex, WebRequest request){
         ResponseError responseError = new ResponseError();

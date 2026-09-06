@@ -71,7 +71,10 @@ public class ResumeController {
     @Operation(summary = "Get resumes by current user", description = "Retrieves a paginated list of resumes belonging to the currently authenticated user. Requires 'RESUME_VIEW_OWN' permission.")
     @GetMapping("/resumes/by-user")
     @PreAuthorize(SecurityConstant.RESUME_VIEW_OWN)
-    public ResponseData<PaginationResponseDTO> getResumesByUser(Pageable pageable){
+    public ResponseData<PaginationResponseDTO> getResumesByUser(Pageable pageable, @RequestParam(required = false) Integer size){
+        if (size != null && size < 1) {
+            throw new IllegalArgumentException("Page size must not be less than one");
+        }
         PaginationResponseDTO responseDTO = this.resumeService.getResumeByUser(pageable);
         return ResponseData.success(responseDTO, SuccessCode.GET_SUCCESS);
     }

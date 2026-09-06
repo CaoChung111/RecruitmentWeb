@@ -37,6 +37,21 @@ spring:
           auth: true
           starttls:
             enable: true
+  # RabbitMQ config
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    virtual-host: /
+    listener:
+      simple:
+        acknowledge-mode: manual    # Manual ACK
+        prefetch: 10                # Mỗi consumer giữ tối đa 10 message
+
+# Feature flag để switch giữa legacy và RabbitMQ
+notification:
+  publisher: rabbitmq   # Đổi thành "spring-events" để dùng legacy path
 
 #config jwt
 caochung:
@@ -52,3 +67,7 @@ cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
   api-key: ${CLOUDINARY_API_KEY}
   api-secret: ${CLOUDINARY_API_SECRET}
+
+server:
+  tomcat:
+    max-swallow-size: -1

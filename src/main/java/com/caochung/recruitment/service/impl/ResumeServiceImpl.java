@@ -49,19 +49,39 @@ public class ResumeServiceImpl implements ResumeService {
     @Override
     @Transactional
     public ResumeResponseDTO submitResume(ResumeRequestDTO resumeRequestDTO) {
+        String email = SecurityUtil.getCurrentUserLogin().orElseThrow(()->new AppException(ErrorCode.UNAUTHENTICATED));
+        User currentUser = userRepository.findByEmail(email).orElseThrow(()->new AppException(ErrorCode.USER_NOT_FOUND));
+        User targetUser = userRepository.findById(resumeRequestDTO.getUserId()).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_FOUND));
+//        if (!currentUser.getId().equals(targetUser.getId())) {
+//            throw new AccessDeniedException("userId phải là chính user đang đăng nhập");
+//        }
+
         Job job = jobRepository.findById(resumeRequestDTO.getJobId()).orElseThrow(
                 () -> new AppException(ErrorCode.JOB_NOT_FOUND));
         if(job.getActive().equals(JobStatusEnum.CLOSED) || job.getActive().equals(JobStatusEnum.DRAFT)){
             throw new AppException(ErrorCode.JOB_INACTIVE);
         }
+//        if(job.getActive().equals(JobStatusEnum.CLOSED) || job.getActive().equals(JobStatusEnum.DRAFT) || job.getActive().equals(JobStatusEnum.FILLED)){
+//            throw new AppException(ErrorCode.JOB_INACTIVE);
+//        }
         if (job.getCompany().getStatus().equals(CompanyStatusEnum.INACTIVE)) {
             throw new AppException(ErrorCode.COMPANY_INACTIVE);
         }
-        if(resumeRepository.existsByJob_IdAndEmail(resumeRequestDTO.getJobId(), resumeRequestDTO.getEmail())){
-            throw new AppException(ErrorCode.ALREADY_APPLIED);
-        }
+//        if(resumeRepository.existsByJob_IdAndEmail(resumeRequestDTO.getJobId(), resumeRequestDTO.getEmail())){
+//            throw new AppException(ErrorCode.ALREADY_APPLIED);
+//        }
         Resume resume = this.resumeMapper.toResume(resumeRequestDTO);
-        return resumeMapper.toDTO(this.resumeRepository.save(resume));
+        Resume saved = this.resumeRepository.save(resume);
+        ResumeStatusUpdateEvent event = ResumeStatusUpdateEvent.builder()
+                .emailTo(saved.getEmail())
+                .username(saved.getUser().getName())
+                .jobName(saved.getJob().getName())
+                .companyName(saved.getJob().getCompany().getName())
+                .status(ResumeStatusEnum.PENDING)
+                .build();
+        publisher.publishEvent(event);
+        return resumeMapper.toDTO(saved);
     }
 
     @Override
