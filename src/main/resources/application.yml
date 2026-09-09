@@ -11,6 +11,7 @@ spring:
       ddl-auto: update
       dialect: org.hibernate.dialect.MySQLDialect
     show-sql: true
+
   # config pagination start 1
   data:
     web:
@@ -18,7 +19,7 @@ spring:
         one-indexed-parameters: true
     redis:
       host: localhost
-      post: 6379
+      port: 6379
   # Multipart config
   servlet:
     multipart:
@@ -48,6 +49,17 @@ spring:
       simple:
         acknowledge-mode: manual    # Manual ACK
         prefetch: 10                # Mỗi consumer giữ tối đa 10 message
+
+  # Gemini Config
+  ai:
+    openai:
+      api-key: ${GEMINI_API_KEY}
+      base-url: https://generativelanguage.googleapis.com/v1beta/openai/
+      chat:
+        options:
+          model: ${GEMINI_MODEL}
+          max-tokens: 4096
+          temperature: 0.0
 
 # Feature flag để switch giữa legacy và RabbitMQ
 notification:

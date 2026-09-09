@@ -33,4 +33,6 @@ public class Resume extends Base{
     @JoinColumn(name = "job_id")
     private Job job;
 
+    @OneToOne(mappedBy = "resume", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private ResumeDetail resumeDetail;
 }

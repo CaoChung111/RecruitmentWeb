@@ -8,6 +8,7 @@ import com.caochung.recruitment.dto.request.JobRequestDTO;
 import com.caochung.recruitment.dto.request.SkillRequestDTO;
 import com.caochung.recruitment.dto.response.JobResponseDTO;
 import com.caochung.recruitment.exception.AppException;
+import com.caochung.recruitment.messaging.dto.JobAlertMessage;
 import com.caochung.recruitment.repository.CompanyRepository;
 import com.caochung.recruitment.repository.JobRepository;
 import com.caochung.recruitment.repository.SkillRepository;
@@ -39,6 +40,9 @@ public abstract class JobMapper {
     public abstract Job fromUpdateJob(JobRequestDTO jobRequestDTO,@MappingTarget Job job);
 
     public abstract JobResponseDTO.JobCompany toDtoCompany(Company company);
+
+    @Mapping(source = "company.name", target = "companyName")
+    public abstract JobAlertMessage.JobSummaryMessage toJobSummary(Job job);
 
     protected List<Skill> mapSkills(List<Long> skills) {
         if (skills == null || skills.isEmpty()) {

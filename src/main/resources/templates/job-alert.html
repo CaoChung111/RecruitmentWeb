@@ -25,7 +25,7 @@
 
     <div th:each="job : ${jobs}" class="job-card">
         <div class="job-title" th:text="${job.name}">Tên công việc</div>
-        <div class="company-name" th:text="'Công ty: ' + ${job.company.name}">Tên công ty</div>
+        <div class="company-name" th:text="'Công ty: ' + ${job.companyName}">Tên công ty</div>
 
         <p style="margin: 5px 0;">💰 Lương: <span class="salary" th:text="${#numbers.formatDecimal(job.salary, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">Thỏa thuận</span></p>
         <p style="margin: 5px 0;">📍 Địa điểm: <span th:text="${job.location}">Cập nhật sau</span></p>

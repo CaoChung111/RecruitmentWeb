@@ -8,8 +8,12 @@ import com.caochung.recruitment.dto.request.RegisterDTO;
 import com.caochung.recruitment.dto.request.ResetPasswordRequestDTO;
 import com.caochung.recruitment.dto.request.VerifyOtpDTO;
 import com.caochung.recruitment.dto.response.UserResponseDTO;
+import com.caochung.recruitment.event.ForgotPasswordEvent;
 import com.caochung.recruitment.event.UserRegisterEvent;
 import com.caochung.recruitment.exception.AppException;
+import com.caochung.recruitment.messaging.dto.EmailNotificationMessage;
+import com.caochung.recruitment.messaging.dto.NotificationType;
+import com.caochung.recruitment.messaging.publisher.NotificationPublisher;
 import com.caochung.recruitment.repository.RoleRepository;
 import com.caochung.recruitment.repository.UserRepository;
 import com.caochung.recruitment.service.AuthService;
@@ -35,6 +39,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RedisService redisService;
     private final ApplicationEventPublisher publisher;
+    private final NotificationPublisher notificationPublisher;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper  userMapper;
     private final RoleRepository roleRepository;
@@ -70,12 +75,19 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
 
-        // Event send otp to user
+        // Event send otp to user by Spring Event
         UserRegisterEvent event = UserRegisterEvent.builder()
                 .email(registerDTO.getEmail())
                 .otpToken(otp)
                 .build();
         publisher.publishEvent(event);
+        // RabbitMQ
+        EmailNotificationMessage message = EmailNotificationMessage.builder()
+                .emailTo(registerDTO.getEmail())
+                .otpToken(otp)
+                .notificationType(NotificationType.USER_REGISTER)
+                .build();
+        notificationPublisher.publish(message);
         return userMapper.toDto(userMapper.toEntity(registerDTO));
     }
 
@@ -120,11 +132,19 @@ public class AuthServiceImpl implements AuthService {
             String otp = OtpGenerator.generateOtp();
 
             this.redisService.savePasswordOtp(user.getEmail(), otp);
-            UserRegisterEvent event = UserRegisterEvent.builder()
+            //Spring Event
+            ForgotPasswordEvent event = ForgotPasswordEvent.builder()
                     .email(user.getEmail())
                     .otpToken(otp)
                     .build();
             publisher.publishEvent(event);
+            // RabbitMQ
+            EmailNotificationMessage message = EmailNotificationMessage.builder()
+                    .emailTo(user.getEmail())
+                    .otpToken(otp)
+                    .notificationType(NotificationType.FORGOT_PASSWORD)
+                    .build();
+            notificationPublisher.publish(message);
         }
     }
 
