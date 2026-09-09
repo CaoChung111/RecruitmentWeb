@@ -45,6 +45,7 @@ public enum ErrorCode {
     JOB_INACTIVE("Job has been inactive", HttpStatus.BAD_REQUEST),
 
     RESUME_NOT_FOUND("Resume not found",  HttpStatus.NOT_FOUND),
+    RESUME_DETAIL_NOT_FOUND("Resume detail not found",  HttpStatus.NOT_FOUND),
     ALREADY_APPLIED("Already applied", HttpStatus.BAD_REQUEST),
 
     PERMISSION_NOT_FOUND("Permission not found",  HttpStatus.NOT_FOUND),

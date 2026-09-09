@@ -1,12 +1,9 @@
 package com.caochung.recruitment.service.impl;
 
-import com.caochung.recruitment.constant.CompanyStatusEnum;
-import com.caochung.recruitment.constant.ErrorCode;
-import com.caochung.recruitment.constant.JobStatusEnum;
-import com.caochung.recruitment.constant.ResumeStatusEnum;
-import com.caochung.recruitment.domain.Company;
+import com.caochung.recruitment.constant.*;
 import com.caochung.recruitment.domain.Job;
 import com.caochung.recruitment.domain.Resume;
+import com.caochung.recruitment.domain.ResumeDetail;
 import com.caochung.recruitment.domain.User;
 import com.caochung.recruitment.dto.request.ResumeRequestDTO;
 import com.caochung.recruitment.dto.request.ResumeUpdateDTO;
@@ -14,10 +11,16 @@ import com.caochung.recruitment.dto.response.PaginationResponseDTO;
 import com.caochung.recruitment.dto.response.ResumeResponseDTO;
 import com.caochung.recruitment.event.ResumeStatusUpdateEvent;
 import com.caochung.recruitment.exception.AppException;
+import com.caochung.recruitment.messaging.dto.CvParsingMessage;
+import com.caochung.recruitment.messaging.dto.EmailNotificationMessage;
+import com.caochung.recruitment.messaging.dto.NotificationType;
+import com.caochung.recruitment.messaging.publisher.CvParsingPublisher;
+import com.caochung.recruitment.messaging.publisher.NotificationPublisher;
 import com.caochung.recruitment.repository.JobRepository;
+import com.caochung.recruitment.repository.ResumeDetailRepository;
 import com.caochung.recruitment.repository.ResumeRepository;
 import com.caochung.recruitment.repository.UserRepository;
-import com.caochung.recruitment.service.CloudinaryService;
+import com.caochung.recruitment.service.ResumeDetailService;
 import com.caochung.recruitment.service.ResumeService;
 import com.caochung.recruitment.service.mapper.ResumeMapper;
 import com.caochung.recruitment.util.SecurityUtil;
@@ -29,10 +32,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.time.Instant;
-import java.util.EventListener;
 import java.util.List;
 
 @Service
@@ -45,6 +45,9 @@ public class ResumeServiceImpl implements ResumeService {
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher publisher;
+    private final NotificationPublisher notificationPublisher;
+    private final CvParsingPublisher cvParsingPublisher;
+    private final ResumeDetailRepository resumeDetailRepository;
 
     @Override
     @Transactional
@@ -53,26 +56,40 @@ public class ResumeServiceImpl implements ResumeService {
         User currentUser = userRepository.findByEmail(email).orElseThrow(()->new AppException(ErrorCode.USER_NOT_FOUND));
         User targetUser = userRepository.findById(resumeRequestDTO.getUserId()).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_FOUND));
-//        if (!currentUser.getId().equals(targetUser.getId())) {
-//            throw new AccessDeniedException("userId phải là chính user đang đăng nhập");
-//        }
+        if (!currentUser.getId().equals(targetUser.getId())) {
+            throw new AccessDeniedException("userId phải là chính user đang đăng nhập");
+        }
 
         Job job = jobRepository.findById(resumeRequestDTO.getJobId()).orElseThrow(
                 () -> new AppException(ErrorCode.JOB_NOT_FOUND));
-        if(job.getActive().equals(JobStatusEnum.CLOSED) || job.getActive().equals(JobStatusEnum.DRAFT)){
+        if(job.getActive().equals(JobStatusEnum.CLOSED) || job.getActive().equals(JobStatusEnum.DRAFT) || job.getActive().equals(JobStatusEnum.FILLED)){
             throw new AppException(ErrorCode.JOB_INACTIVE);
         }
-//        if(job.getActive().equals(JobStatusEnum.CLOSED) || job.getActive().equals(JobStatusEnum.DRAFT) || job.getActive().equals(JobStatusEnum.FILLED)){
-//            throw new AppException(ErrorCode.JOB_INACTIVE);
-//        }
         if (job.getCompany().getStatus().equals(CompanyStatusEnum.INACTIVE)) {
             throw new AppException(ErrorCode.COMPANY_INACTIVE);
         }
-//        if(resumeRepository.existsByJob_IdAndEmail(resumeRequestDTO.getJobId(), resumeRequestDTO.getEmail())){
-//            throw new AppException(ErrorCode.ALREADY_APPLIED);
-//        }
+        if(resumeRepository.existsByJob_IdAndEmail(resumeRequestDTO.getJobId(), resumeRequestDTO.getEmail())){
+            throw new AppException(ErrorCode.ALREADY_APPLIED);
+        }
         Resume resume = this.resumeMapper.toResume(resumeRequestDTO);
         Resume saved = this.resumeRepository.save(resume);
+
+        ResumeDetail resumeDetail = ResumeDetail.builder()
+                .resume(saved)
+                .analysisStatus(AnalysisStatusEnum.PENDING)
+                .build();
+        this.resumeDetailRepository.save(resumeDetail);
+
+        // Bắn message cho RabbitMQ phân tích resume
+        CvParsingMessage parsingMessage = CvParsingMessage.builder()
+                .resumeId(saved.getId())
+                .candidateEmail(saved.getEmail())
+                .candidateName(saved.getUser().getName())
+                .cloudinaryUrl(saved.getUrl())
+                .build();
+        cvParsingPublisher.publish(parsingMessage);
+
+        // Spring Event
         ResumeStatusUpdateEvent event = ResumeStatusUpdateEvent.builder()
                 .emailTo(saved.getEmail())
                 .username(saved.getUser().getName())
@@ -81,6 +98,10 @@ public class ResumeServiceImpl implements ResumeService {
                 .status(ResumeStatusEnum.PENDING)
                 .build();
         publisher.publishEvent(event);
+
+        // RabbitMQ
+        EmailNotificationMessage message = buildResumeNotificationMessage(saved);
+        notificationPublisher.publish(message);
         return resumeMapper.toDTO(saved);
     }
 
@@ -90,6 +111,8 @@ public class ResumeServiceImpl implements ResumeService {
         Resume resume = resumeRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.RESUME_NOT_FOUND));
         resumeMapper.fromUpdate(resumeUpdateDTO, resume);
+
+        // Spring Event
         ResumeStatusUpdateEvent event = ResumeStatusUpdateEvent.builder()
                 .emailTo(resume.getEmail())
                 .username(resume.getUser().getName())
@@ -98,6 +121,10 @@ public class ResumeServiceImpl implements ResumeService {
                 .status(resume.getStatus())
                 .build();
         publisher.publishEvent(event);
+
+        // RabbitMQ
+        EmailNotificationMessage message = buildResumeNotificationMessage(resume);
+        notificationPublisher.publish(message);
     }
 
     @Override
@@ -106,20 +133,23 @@ public class ResumeServiceImpl implements ResumeService {
         Resume resume = resumeRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.RESUME_NOT_FOUND));
         String email = SecurityUtil.getCurrentUserLogin().orElseThrow(()->new AppException(ErrorCode.UNAUTHENTICATED));
+        if(resume.getEmail().equals(email)){
+            resume.setStatus(ResumeStatusEnum.WITHDRAWN);
+        }else {
+            resume.setStatus(ResumeStatusEnum.SYSTEM_CANCEL);
+        }
+        //Spring Event
         ResumeStatusUpdateEvent event = ResumeStatusUpdateEvent.builder()
                 .emailTo(resume.getEmail())
                 .username(resume.getUser().getName())
                 .jobName(resume.getJob().getName())
                 .companyName(resume.getJob().getCompany().getName())
+                .status(resume.getStatus())
                 .build();
-        if(resume.getEmail().equals(email)){
-            resume.setStatus(ResumeStatusEnum.WITHDRAWN);
-            event.setStatus(ResumeStatusEnum.WITHDRAWN);
-        }else {
-            resume.setStatus(ResumeStatusEnum.SYSTEM_CANCEL);
-            event.setStatus(ResumeStatusEnum.SYSTEM_CANCEL);
-        }
         publisher.publishEvent(event);
+        // RabbitMQ
+        EmailNotificationMessage message = buildResumeNotificationMessage(resume);
+        notificationPublisher.publish(message);
     }
 
     @Override
@@ -171,5 +201,16 @@ public class ResumeServiceImpl implements ResumeService {
                 .totalPages(resumePage.getTotalPages())
                 .build();
         return new PaginationResponseDTO(meta, resumeResponseDTOS);
+    }
+
+    private EmailNotificationMessage buildResumeNotificationMessage(Resume resume) {
+        return EmailNotificationMessage.builder()
+                .emailTo(resume.getEmail())
+                .username(resume.getUser().getName())
+                .jobName(resume.getJob().getName())
+                .companyName(resume.getJob().getCompany().getName())
+                .notificationType(NotificationType.RESUME_STATUS_UPDATE)
+                .status(resume.getStatus())
+                .build();
     }
 }
