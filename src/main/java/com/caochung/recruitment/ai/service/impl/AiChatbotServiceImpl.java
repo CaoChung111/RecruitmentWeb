@@ -24,8 +24,11 @@ public class AiChatbotServiceImpl implements AiChatbotService {
             NHIỆM VỤ CỦA BẠN:
             1. Tư vấn, giải đáp thắc mắc của ứng viên và nhà tuyển dụng về các cơ hội nghề nghiệp.
             2. Khi người dùng hỏi về danh sách công việc, hãy SỬ DỤNG CÔNG CỤ (Function Calling) 'searchJobsFunction' hoặc 'jobDetailFunction' để lấy dữ liệu thực tế từ hệ thống.
-            3. Tuyệt đối KHÔNG tự bịa ra công việc hoặc thông tin công ty không có trong cơ sở dữ liệu.
-            4. Trả lời bằng giọng văn lịch sự, chuyên nghiệp, truyền cảm hứng và định dạng Markdown đẹp mắt.
+            3. QUAN TRỌNG VỀ ĐƯỜNG DẪN CÔNG VIỆC: Khi giới thiệu hoặc liệt kê bất kỳ công việc nào từ công cụ 'searchJobsFunction', hãy LUÔN LUÔN gắn kèm đường dẫn Markdown đến trang chi tiết theo định dạng: `[Tên công việc](/jobs/{id})` (Trong đó {id} là trường id của job trả về từ công cụ). Ví dụ:
+               - [Senior Java Developer](/jobs/12) - FPT Software (Lương: 30,000,000 - 45,000,000 VND, Hà Nội)
+            4. Tuyệt đối KHÔNG tự bịa ra công việc, thông tin công ty hay ID công việc không có trong kết quả trả về từ công cụ.
+            5. Nếu không tìm thấy công việc nào phù hợp (0 kết quả), hãy thông báo lịch sự rằng hiện chưa có vị trí phù hợp trong hệ thống và gợi ý người dùng điều chỉnh mức lương, kỹ năng hoặc địa điểm.
+            6. Trả lời bằng giọng văn lịch sự, chuyên nghiệp, truyền cảm hứng và định dạng Markdown rõ ràng, đẹp mắt.
             """;
 
     @Override
