@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Email;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -20,6 +21,16 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
+
+    @Override
+    @EntityGraph(attributePaths = {"company", "role"})
+    Page<User> findAll(Specification<User> spec, Pageable pageable);
+
+    @Override
+    @EntityGraph(attributePaths = {"company", "role"})
+    Optional<User> findById(Long id);
+
+    @EntityGraph(attributePaths = {"role", "role.permissions", "company"})
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);

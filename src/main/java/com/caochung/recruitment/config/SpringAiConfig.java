@@ -19,7 +19,7 @@ public class SpringAiConfig {
     public ChatMemory chatMemory() {
         return MessageWindowChatMemory.builder()
                 .chatMemoryRepository(new InMemoryChatMemoryRepository())
-                .maxMessages(20)
+                .maxMessages(10)
                 .build();
     }
 

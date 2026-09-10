@@ -4,6 +4,7 @@ import com.caochung.recruitment.ai.dto.tool.JobDetailToolRequest;
 import com.caochung.recruitment.ai.dto.tool.JobDetailToolResponse;
 import com.caochung.recruitment.ai.dto.tool.JobSearchToolRequest;
 import com.caochung.recruitment.ai.dto.tool.JobSummaryToolResponse;
+import com.caochung.recruitment.constant.JobStatusEnum;
 import com.caochung.recruitment.domain.Job;
 import com.caochung.recruitment.repository.JobRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ public class RecruitmentToolsConfig {
                         ? request.level().trim() : null;
                 Double minSalary = (request != null) ? request.minSalary() : null;
 
-                List<Job> matchedJobs = jobRepository.findAll().stream()
+                List<Job> matchedJobs = jobRepository.findAllByActive(JobStatusEnum.OPEN).stream()
                         .filter(job -> keyword == null ||
                                 (job.getName() != null && job.getName().toLowerCase().contains(keyword)) ||
                                 (job.getDescription() != null && job.getDescription().toLowerCase().contains(keyword)))

@@ -2,6 +2,7 @@ package com.caochung.recruitment.ai.service.impl;
 
 import com.caochung.recruitment.ai.dto.SemanticSearchResultDTO;
 import com.caochung.recruitment.ai.service.SemanticSearchService;
+import com.caochung.recruitment.constant.JobStatusEnum;
 import com.caochung.recruitment.domain.Job;
 import com.caochung.recruitment.repository.JobRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
     @Override
     public void indexAllJobs() {
         log.info("Starting batch indexing all active Jobs into Vector Store...");
-        List<Job> jobs = jobRepository.findAll();
+        List<Job> jobs = jobRepository.findAllByActive(JobStatusEnum.OPEN);
 
         List<Document> documents = jobs.stream()
                 .map(job -> {

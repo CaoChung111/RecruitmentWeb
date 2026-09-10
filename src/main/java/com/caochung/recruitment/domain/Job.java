@@ -46,7 +46,7 @@ public class Job extends Base{
     @Enumerated(EnumType.STRING)
     private JobStatusEnum active;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
     private Company company;
 

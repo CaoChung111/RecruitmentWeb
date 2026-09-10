@@ -43,14 +43,14 @@ public class User extends Base{
     @Column(name = "refresh_token",columnDefinition = "MEDIUMTEXT")
     private String refreshToken;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
     private Company company;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Resume> resumes;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
     private Role role;
 }
