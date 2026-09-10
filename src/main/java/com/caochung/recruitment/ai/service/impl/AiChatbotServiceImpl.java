@@ -5,6 +5,8 @@ import com.caochung.recruitment.ai.service.AiChatbotService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class AiChatbotServiceImpl implements AiChatbotService {
 
     private final ChatClient chatClient;
+    private final ChatMemory chatMemory;
 
     private static final String SYSTEM_PROMPT = """
             Bạn là Trợ lý Tuyển dụng AI Cao cấp của nền tảng RecruitmentWeb.
@@ -33,6 +36,7 @@ public class AiChatbotServiceImpl implements AiChatbotService {
         return chatClient.prompt()
                 .system(SYSTEM_PROMPT)
                 .user(request.message())
+                .advisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
                 .advisors(advisorSpec -> advisorSpec.param("chat_memory_conversation_id", conversationId))
                 .toolNames("searchJobsFunction", "jobDetailFunction")
                 .call()

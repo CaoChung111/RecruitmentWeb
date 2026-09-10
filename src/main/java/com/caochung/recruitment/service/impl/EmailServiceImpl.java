@@ -69,6 +69,9 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendNotificationEmail(EmailNotificationMessage message) {
         log.info("PROCESSING NOTIFICATION EMAIL: TYPE={}, TO={}", message.getNotificationType(), message.getEmailTo());
+        if (message.getOtpToken() != null && !message.getOtpToken().isBlank()) {
+            log.info(">>> [OTP NOTIFICATION] To: {}, Type: {}, OTP Code: [{}]", message.getEmailTo(), message.getNotificationType(), message.getOtpToken());
+        }
         switch (message.getNotificationType()) {
             case USER_REGISTER -> {
                 Context context = new Context();
@@ -100,9 +103,9 @@ public class EmailServiceImpl implements EmailService {
             helper.setText(htmlContent, true);
             mailSender.send(mimeMessage);
             log.info("EMAIL SEND SUCCESSFUL TO {} : {}", to, subject);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("ERROR SEND EMAIL TO {} : {}", to, e.getMessage());
-            throw new RuntimeException("Email send failed", e);
+            throw new RuntimeException("Email send failed: " + e.getMessage(), e);
         }
     }
 

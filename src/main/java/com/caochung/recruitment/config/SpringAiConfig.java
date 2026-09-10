@@ -25,9 +25,7 @@ public class SpringAiConfig {
 
     @Bean
     public ChatClient chatClient(ChatClient.Builder chatClientBuilder) {
-        return chatClientBuilder
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory()).build())
-                .build();
+        return chatClientBuilder.build();
     }
 
     @Bean
