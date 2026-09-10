@@ -10,10 +10,16 @@ import com.caochung.recruitment.repository.ResumeDetailRepository;
 import com.caochung.recruitment.repository.ResumeRepository;
 import com.caochung.recruitment.service.ResumeDetailService;
 import com.caochung.recruitment.service.mapper.ResumeDetailMapper;
+import com.caochung.recruitment.dto.response.ResumeDetailResponseDTO;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
 
 @Service
 @Slf4j(topic = "RESUME-DETAIL-SERVICE")
@@ -23,6 +29,46 @@ public class ResumeDetailServiceImpl implements ResumeDetailService {
     private final ResumeDetailRepository resumeDetailRepository;
     private final ResumeDetailMapper resumeDetailMapper;
     private final ResumeRepository resumeRepository;
+    private final ObjectMapper objectMapper;
+
+    @Override
+    public ResumeDetailResponseDTO getParsedResumeDetail(Long resumeId) {
+        ResumeDetail detail = resumeDetailRepository.findByResume_Id(resumeId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESUME_DETAIL_NOT_FOUND));
+
+        List<String> skillsList = Collections.emptyList();
+        if (detail.getSkills() != null && !detail.getSkills().isBlank()) {
+            try {
+                skillsList = objectMapper.readValue(detail.getSkills(), new TypeReference<List<String>>() {});
+            } catch (Exception e) {
+                log.warn("Failed to parse skills JSON for resumeId={}", resumeId);
+            }
+        }
+
+        List<ParsedCvDTO.ExperienceDTO> experiencesList = Collections.emptyList();
+        if (detail.getExperiences() != null && !detail.getExperiences().isBlank()) {
+            try {
+                experiencesList = objectMapper.readValue(detail.getExperiences(), new TypeReference<List<ParsedCvDTO.ExperienceDTO>>() {});
+            } catch (Exception e) {
+                log.warn("Failed to parse experiences JSON for resumeId={}", resumeId);
+            }
+        }
+
+        return ResumeDetailResponseDTO.builder()
+                .id(detail.getId())
+                .resumeId(resumeId)
+                .fullName(detail.getFullName())
+                .email(detail.getEmail())
+                .phone(detail.getPhone())
+                .skills(skillsList)
+                .yearsOfExperience(detail.getYearsOfExperience())
+                .currentPosition(detail.getCurrentPosition())
+                .summary(detail.getSummary())
+                .education(detail.getEducation())
+                .experiences(experiencesList)
+                .analysisStatus(detail.getAnalysisStatus())
+                .build();
+    }
 
     @Override
     @Transactional

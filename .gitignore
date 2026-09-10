@@ -38,4 +38,5 @@ out/
 
 ### ENV ###
 application-dev.yml
+.env
 *.env

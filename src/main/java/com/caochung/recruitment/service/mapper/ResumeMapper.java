@@ -31,6 +31,7 @@ public abstract class ResumeMapper {
     public abstract Resume toResume(ResumeRequestDTO resumeRequestDTO);
 
     @Mapping(source = "job.company.name", target = "companyName")
+    @Mapping(source = "resumeDetail.analysisStatus", target = "analysisStatus")
     public abstract ResumeResponseDTO toDTO(Resume resume);
     public abstract ResumeResponseDTO.UserResume toDTO(User user);
     public abstract ResumeResponseDTO.JobResume toDTO(Job job);

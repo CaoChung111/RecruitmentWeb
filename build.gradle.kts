@@ -23,7 +23,7 @@ repositories {
     maven { url = uri("https://repo.spring.io/milestone") }
 }
 
-extra["springAiVersion"] = "1.0.0-M6"
+extra["springAiVersion"] = "1.1.8"
 
 dependencyManagement {
     imports {
@@ -59,8 +59,12 @@ dependencies {
     implementation("com.cloudinary:cloudinary-http44:1.36.0")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
 
-    // Spring AI
-    implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter")
+    // Spring AI Official Google GenAI Starters
+    implementation("org.springframework.ai:spring-ai-starter-model-google-genai")
+    implementation("org.springframework.ai:spring-ai-starter-model-google-genai-embedding")
+    implementation("org.springframework.ai:spring-ai-starter-model-chat-memory")
+    implementation("org.springframework.ai:spring-ai-vector-store")
+    implementation("org.springframework.ai:spring-ai-client-chat")
     // Lombok & MapStruct
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
@@ -78,3 +82,7 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.named<Jar>("jar") {
+    enabled = false
+}

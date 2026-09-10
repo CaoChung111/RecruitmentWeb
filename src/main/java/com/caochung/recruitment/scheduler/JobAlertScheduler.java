@@ -27,8 +27,7 @@ public class JobAlertScheduler {
     private final JobAlertPublisher publisher;
     private final JobMapper jobMapper;
 
-//    @Scheduled(cron = "0 0 8 * * ?")
-    @Scheduled(cron = "0 */2 * * * *")
+    @Scheduled(cron = "0 0 8 * * ?")
     @Transactional(readOnly = true)
     public void scheduledJobAlertEmail() {
         log.info("STARTING SCHEDULER JOB ALERT EMAIL");

@@ -100,12 +100,20 @@ public class GlobalExceptionHandler{
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseError> handleUnwantedException(Exception ex, WebRequest request){
+        ex.printStackTrace();
         ResponseError responseError = new ResponseError();
         responseError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         responseError.setTimestamp(new Date());
         responseError.setPath(request.getDescription(false).replace("uri=", ""));
         responseError.setError(ErrorCode.UNCATEGORIZED_EXCEPTION.name());
-        responseError.setMessage(ex.getMessage());
+        String msg = ex.getMessage();
+        if (ex.getCause() != null) {
+            msg += " | Cause: " + ex.getCause().getMessage();
+            if (ex.getCause().getCause() != null) {
+                msg += " | Root: " + ex.getCause().getCause().getMessage();
+            }
+        }
+        responseError.setMessage(msg);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseError);
     }
 }

@@ -23,6 +23,8 @@ public class ResumeResponseDTO {
 
     private String status;
 
+    private String analysisStatus;
+
     private String companyName;
 
     private UserResume user;

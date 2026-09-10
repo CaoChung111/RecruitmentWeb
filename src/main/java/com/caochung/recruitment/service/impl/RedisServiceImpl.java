@@ -12,7 +12,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j(topic = "OPT-SERVICE")
+@Slf4j(topic = "REDIS-SERVICE")
 public class RedisServiceImpl implements RedisService {
     private final RedisTemplate<String, String> redisTemplate;
     private static final String FORGOT_PASSWORD_PREFIX = "forgot_password";
