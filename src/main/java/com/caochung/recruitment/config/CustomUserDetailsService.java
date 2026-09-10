@@ -25,9 +25,17 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = this.userService.getUserByUsername(username);
+        User user;
+        try {
+            user = this.userService.getUserByUsername(username);
+        } catch (AppException e) {
+            if (e.getErrorCode() == ErrorCode.USER_NOT_FOUND) {
+                throw new UsernameNotFoundException("User not found: " + username);
+            }
+            throw e;
+        }
         if (user == null) {
-            throw new UsernameNotFoundException(username);
+            throw new UsernameNotFoundException("User not found: " + username);
         }
         if (user.getStatus().equals(UserStatusEnum.DISABLED)) {
             throw new AppException(ErrorCode.USER_DISABLED);

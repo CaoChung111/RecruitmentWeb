@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
@@ -37,16 +39,28 @@ public class GlobalExceptionHandler{
         return ResponseEntity.status(errorCode.getHttpStatus()).body(responseError);
     }
 
-    @ExceptionHandler({UsernameNotFoundException.class, BadCredentialsException.class})
+    @ExceptionHandler({UsernameNotFoundException.class, BadCredentialsException.class, InternalAuthenticationServiceException.class, AuthenticationException.class})
     public ResponseEntity<ResponseError> handleLoginException(Exception ex, WebRequest request){
         ResponseError responseError = new ResponseError();
         responseError.setStatus(HttpStatus.UNAUTHORIZED.value());
         responseError.setTimestamp(new Date());
-        responseError.setPath(request.getContextPath() + "/login");
-        responseError.setMessage(ex.getMessage());
-        responseError.setError("Invalid username/password");
+        responseError.setPath(request.getDescription(false).replace("uri=", ""));
+        
+        String msg = "Incorrect email or password";
+        if (ex.getCause() instanceof AppException appEx) {
+            if (appEx.getErrorCode() == ErrorCode.USER_DISABLED) {
+                msg = "Account is disabled";
+            } else if (appEx.getErrorCode() == ErrorCode.USER_NOT_FOUND) {
+                msg = "User not found";
+            }
+        } else if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("user not found")) {
+            msg = "User not found";
+        } else if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("bad credentials")) {
+            msg = "Incorrect email or password";
+        }
+        responseError.setMessage(msg);
+        responseError.setError("Authentication Failed");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseError);
-
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -87,16 +101,16 @@ public class GlobalExceptionHandler{
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseError);
     }
 
-//    @ExceptionHandler(IllegalArgumentException.class)
-//    public ResponseEntity<ResponseError> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request){
-//        ResponseError responseError = new ResponseError();
-//        responseError.setStatus(HttpStatus.BAD_REQUEST.value());
-//        responseError.setTimestamp(new Date());
-//        responseError.setPath(request.getDescription(false).replace("uri=", ""));
-//        responseError.setError(HttpStatus.BAD_REQUEST.getReasonPhrase());
-//        responseError.setMessage(ex.getMessage());
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseError);
-//    }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ResponseError> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request){
+        ResponseError responseError = new ResponseError();
+        responseError.setStatus(HttpStatus.BAD_REQUEST.value());
+        responseError.setTimestamp(new Date());
+        responseError.setPath(request.getDescription(false).replace("uri=", ""));
+        responseError.setError(HttpStatus.BAD_REQUEST.getReasonPhrase());
+        responseError.setMessage(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseError);
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseError> handleUnwantedException(Exception ex, WebRequest request){
