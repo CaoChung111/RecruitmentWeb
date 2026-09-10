@@ -26,12 +26,13 @@ RUN apk add --no-cache tzdata && \
 
 # Tạo user không phải root để đảm bảo an toàn
 RUN addgroup -S spring && adduser -S spring -G spring
-USER spring:spring
 
 WORKDIR /app
 
-# Copy file jar từ stage build
-COPY --from=build --chown=spring:spring /home/gradle/src/build/libs/*[!plain].jar /app/app.jar
+# Copy trực tiếp file jar sang /app/app.jar
+COPY --from=build --chown=spring:spring /home/gradle/src/build/libs/*.jar /app/app.jar
+
+USER spring:spring
 
 EXPOSE 8080
 
